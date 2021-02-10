@@ -1,15 +1,18 @@
 {
+  "name": "pathform",
+  "author": "Ian Lovett",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=10"
+  },
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "module": "dist/pathform.esm.js",
   "files": [
     "dist",
     "src"
   ],
-  "engines": {
-    "node": ">=10"
-  },
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
@@ -19,8 +22,27 @@
     "size": "size-limit",
     "analyze": "size-limit --why"
   },
+  "dependencies": {
+    "lodash": "^4.17.20",
+    "lodash-es": "^4.17.20",
+    "uuid": "^3.4.0"
+  },
   "peerDependencies": {
     "react": ">=16"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^4.9.2",
+    "@types/lodash": "^4.14.168",
+    "@types/react": "^17.0.1",
+    "@types/react-dom": "^17.0.0",
+    "@types/uuid": "^8.3.0",
+    "husky": "^5.0.9",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "size-limit": "^4.9.2",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.1.0",
+    "typescript": "^4.1.5"
   },
   "husky": {
     "hooks": {
@@ -28,14 +50,12 @@
     }
   },
   "prettier": {
-    "printWidth": 80,
+    "printWidth": 140,
     "semi": true,
     "singleQuote": true,
-    "trailingComma": "es5"
+    "trailingComma": "es5",
+    "arrowParens": "always"
   },
-  "name": "pathform",
-  "author": "Ian Lovett",
-  "module": "dist/pathform.esm.js",
   "size-limit": [
     {
       "path": "dist/pathform.cjs.production.min.js",
@@ -45,17 +65,5 @@
       "path": "dist/pathform.esm.js",
       "limit": "10 KB"
     }
-  ],
-  "devDependencies": {
-    "@size-limit/preset-small-lib": "^4.9.2",
-    "@types/react": "^17.0.1",
-    "@types/react-dom": "^17.0.0",
-    "husky": "^5.0.9",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "size-limit": "^4.9.2",
-    "tsdx": "^0.14.1",
-    "tslib": "^2.1.0",
-    "typescript": "^4.1.5"
-  }
+  ]
 }
