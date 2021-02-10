@@ -421,14 +421,8 @@ export function usePathFormActions() {
         watchers.current.emit(dotpath, storeItem);
       },
 
-      /**
-       * TODO
-       * There are some big gains in performance to be made here.
-       * Need to be able to maintain the key uuid in a well performing way.
-       * One idea was to iterate over the map in reverse, bumping the indices by one, making room for new one.
-       * Other idea would be to completely wipe out the meta for the original array
-       * maybe save the uuids and bring them back after recalculating?
-       */
+      // TODO dry-ify these target array mutations
+      // validate that the storeItem is an array, do some callback action, and emit
       array: {
         // TODO a lot of repeated code here can be DRY-ified
         append: (path: PathFormPath, item: any) => {

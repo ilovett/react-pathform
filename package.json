@@ -1,18 +1,20 @@
 {
   "name": "pathform",
+  "version": "0.0.0",
   "author": "Ian Lovett",
-  "version": "0.1.0",
-  "engines": {
-    "node": ">=10"
-  },
+  "repository": "github:ilovett/react-pathform",
+  "homepage": "https://github.com/ilovett/react-pathform",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
-  "module": "dist/pathform.esm.js",
+  "module": "dist/react-pathform.esm.js",
   "files": [
     "dist",
     "src"
   ],
+  "engines": {
+    "node": ">=10"
+  },
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
@@ -33,12 +35,12 @@
   "devDependencies": {
     "@size-limit/preset-small-lib": "^4.9.2",
     "@types/lodash": "^4.14.168",
-    "@types/react": "^17.0.1",
-    "@types/react-dom": "^17.0.0",
+    "@types/react": "^16.0.0",
+    "@types/react-dom": "^16.0.0",
     "@types/uuid": "^8.3.0",
     "husky": "^5.0.9",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
     "size-limit": "^4.9.2",
     "tsdx": "^0.14.1",
     "tslib": "^2.1.0",
@@ -58,11 +60,11 @@
   },
   "size-limit": [
     {
-      "path": "dist/pathform.cjs.production.min.js",
+      "path": "dist/react-pathform.cjs.production.min.js",
       "limit": "10 KB"
     },
     {
-      "path": "dist/pathform.esm.js",
+      "path": "dist/react-pathform.esm.js",
       "limit": "10 KB"
     }
   ]
