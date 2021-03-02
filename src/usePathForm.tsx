@@ -257,6 +257,19 @@ type PathFormStateContextInitialized = {
 type PathFormStateContext = {
   state: React.MutableRefObject<PathFormState>;
   watchers: React.MutableRefObject<PathFormWatcher>;
+  array: PathFormArrayUtils;
+  getValues: () => any;
+  setValue: (path: PathFormPath, value: any) => any;
+  setTouched: (path: PathFormPath, touched: boolean) => any;
+  addError: (path: PathFormPath, error: PathFormError) => any;
+  clearError: (path: PathFormPath) => any;
+};
+
+type PathFormArrayUtils = {
+  append: (path: PathFormPath, item: any) => any;
+  prepend: (path: PathFormPath, item: any) => any;
+  remove: (path: PathFormPath, item: any) => any;
+  move: (path: PathFormPath, fromIndex: number, toIndex: number) => any;
 };
 
 const PathFormStateContext = React.createContext<PathFormStateContextInitialized | PathFormStateContext>({
@@ -292,10 +305,127 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
   });
   const watchers = React.useRef(eventEmitter());
 
-  // TODO consider proxy OR passed to `handleSubmit`
-  (state.current as any).asSubmitData = () => parseStore(state.current.store);
+  const getValues = () => {
+    return parseStore(state.current.store);
+  };
 
-  return <PathFormStateContext.Provider value={{ state, watchers }}>{children}</PathFormStateContext.Provider>;
+  const setValue = (path: PathFormPath, value: any) => {
+    const storePath = toStorePath(path);
+    const storeItem = get(state.current.store, storePath); // TODO default value based on value here?
+
+    // TODO if storeItem not found / setup new storeItem
+
+    // only update store & emit to subscribers if value changed
+    if (storeItem?.value !== value) {
+      set(state.current.store, [...storePath, 'value'], value);
+      watchers.current.emit(toDotPath(path), value);
+    }
+  };
+
+  const setTouched = (path: PathFormPath, touched: boolean) => {
+    const dotpath = toDotPath(path);
+    const storePath = toStorePath(path);
+    const storeItem = get(state.current.store, storePath);
+
+    // validate that the target store item exists
+    if (storeItem === undefined) {
+      throw new Error(`The target path "${dotpath}" does not exist.`);
+    }
+
+    // mutate the target store item
+    set(state.current.store, [...storePath, 'meta', 'touched'], touched);
+
+    // notify subscribers
+    watchers.current.emit(dotpath, storeItem);
+  };
+
+  const addError = (path: PathFormPath, error: PathFormError) => {
+    const dotpath = toDotPath(path);
+    const storePath = toStorePath(path);
+    const storeItem = get(state.current.store, storePath); // TODO default value based on value here?
+
+    // validate that the target store item exists
+    if (storeItem === undefined) {
+      throw new Error(`The target path "${dotpath}" does not exist.`);
+    }
+
+    // mutate the target store item error
+    set(state.current.store, [...storePath, 'meta', 'error'], error);
+
+    // notify subscribers
+    watchers.current.emit(dotpath, storeItem);
+  };
+
+  const clearError = (path: PathFormPath) => {
+    const dotpath = toDotPath(path);
+    const storePath = toStorePath(path);
+    const storeItem = get(state.current.store, storePath);
+
+    // validate that the target store item exists
+    if (storeItem === undefined) {
+      throw new Error(`The target path "${dotpath}" does not exist.`);
+    }
+
+    // mutate the target store item
+    set(state.current.store, [...storePath, 'meta', 'error'], null);
+
+    // notify subscribers
+    watchers.current.emit(dotpath, storeItem);
+  };
+
+  // helper for mutating store arrays to keep the array utils DRY
+  // validate that the storeItem is an array, do some callback action, and emit
+  const mutateArray = (path: PathFormPath, mutate: (targetArrayStoreItem: PathFormStoreArray) => any) => {
+    const dotpath = toDotPath(path);
+    const targetArrayStoreItem = get(state.current.store, toStorePath(path));
+
+    // validate that the target value is an array
+    if (targetArrayStoreItem?.type !== 'array' || !Array.isArray(targetArrayStoreItem?.value)) {
+      throw new TypeError(`The target path "${dotpath}" is not an array.`);
+    }
+
+    // do the mutation
+    mutate(targetArrayStoreItem);
+
+    // notify subscribers
+    watchers.current.emit(dotpath, targetArrayStoreItem);
+  };
+
+  const array = {
+    append: (path: PathFormPath, item: any) => {
+      mutateArray(path, (targetArrayStoreItem: PathFormStoreArray) => {
+        // push the new store item to the end of the array
+        targetArrayStoreItem.value.push(createStoreItem(item));
+      });
+    },
+
+    prepend: (path: PathFormPath, item: any) => {
+      mutateArray(path, (targetArrayStoreItem: PathFormStoreArray) => {
+        // unshift the new store item to the beginning of the array
+        targetArrayStoreItem.value.unshift(createStoreItem(item));
+      });
+    },
+
+    move: (path: PathFormPath, fromIndex: number, toIndex: number) => {
+      mutateArray(path, (targetArrayStoreItem: PathFormStoreArray) => {
+        // mutate the target array
+        arrayMove(targetArrayStoreItem.value, fromIndex, toIndex);
+      });
+    },
+
+    remove: (path: PathFormPath, index: number) => {
+      mutateArray(path, (targetArrayStoreItem: PathFormStoreArray) => {
+        // mutate the target array
+        arrayRemove(targetArrayStoreItem.value, index);
+      });
+    },
+  };
+
+  return (
+    <PathFormStateContext.Provider value={{ state, watchers, array, getValues, setValue, addError, clearError, setTouched }}>
+      {children}
+    </PathFormStateContext.Provider>
+  );
 };
 
 export function usePathForm() {
@@ -344,160 +474,14 @@ export const usePathFormValue = (path: PathFormPath, defaultValue?: any) => {
 
   // renders is increased, but `value` and `meta` are pulled at the time of render
   return React.useMemo(() => {
-    return { value, meta };
+    return [value, meta];
   }, [value, meta]);
 };
 
-export function usePathFormActions() {
-  const { state, watchers } = usePathForm();
-
-  return React.useMemo(() => {
-    return {
-      getValues: () => {
-        return parseStore(state.current.store);
-      },
-
-      setValue: (path: PathFormPath, value: any) => {
-        const storePath = toStorePath(path);
-        const storeItem = get(state.current.store, storePath); // TODO default value based on value here?
-
-        // TODO if storeItem not found / setup new storeItem
-
-        // only update store & emit to subscribers if value changed
-        if (storeItem?.value !== value) {
-          set(state.current.store, [...storePath, 'value'], value);
-          watchers.current.emit(toDotPath(path), value);
-        }
-      },
-
-      setTouched: (path: PathFormPath, touched: boolean) => {
-        const dotpath = toDotPath(path);
-        const storePath = toStorePath(path);
-        const storeItem = get(state.current.store, storePath);
-
-        // validate that the target store item exists
-        if (storeItem === undefined) {
-          throw new Error(`The target path "${dotpath}" does not exist.`);
-        }
-
-        // mutate the target store item
-        set(state.current.store, [...storePath, 'meta', 'touched'], touched);
-
-        // notify subscribers
-        watchers.current.emit(dotpath, storeItem);
-      },
-
-      clearError: (path: PathFormPath) => {
-        const dotpath = toDotPath(path);
-        const storePath = toStorePath(path);
-        const storeItem = get(state.current.store, storePath);
-
-        // validate that the target store item exists
-        if (storeItem === undefined) {
-          throw new Error(`The target path "${dotpath}" does not exist.`);
-        }
-
-        // mutate the target store item
-        set(state.current.store, [...storePath, 'meta', 'error'], null);
-
-        // notify subscribers
-        watchers.current.emit(dotpath, storeItem);
-      },
-
-      addError: (path: PathFormPath, error: PathFormError) => {
-        const dotpath = toDotPath(path);
-        const storePath = toStorePath(path);
-        const storeItem = get(state.current.store, storePath); // TODO default value based on value here?
-
-        // validate that the target store item exists
-        if (storeItem === undefined) {
-          throw new Error(`The target path "${dotpath}" does not exist.`);
-        }
-
-        // mutate the target store item error
-        set(state.current.store, [...storePath, 'meta', 'error'], error);
-
-        // notify subscribers
-        watchers.current.emit(dotpath, storeItem);
-      },
-
-      // TODO dry-ify these target array mutations
-      // validate that the storeItem is an array, do some callback action, and emit
-      array: {
-        // TODO a lot of repeated code here can be DRY-ified
-        append: (path: PathFormPath, item: any) => {
-          const dotpath = toDotPath(path);
-          const targetArrayStoreItem = get(state.current.store, toStorePath(path));
-
-          // validate that the target value is an array
-          if (targetArrayStoreItem?.type !== 'array' || !Array.isArray(targetArrayStoreItem?.value)) {
-            throw new TypeError(`The target path "${dotpath}" is not an array.`);
-          }
-
-          // mutate the target store item
-          targetArrayStoreItem.value.push(createStoreItem(item));
-
-          // notify subscribers
-          watchers.current.emit(dotpath, targetArrayStoreItem);
-        },
-
-        prepend: (path: PathFormPath, item: any) => {
-          const dotpath = toDotPath(path);
-          const targetArrayStoreItem = get(state.current.store, toStorePath(path));
-
-          // validate that the target value is an array
-          if (targetArrayStoreItem?.type !== 'array' || !Array.isArray(targetArrayStoreItem?.value)) {
-            throw new TypeError(`The target path "${dotpath}" is not an array.`);
-          }
-
-          // mutate the store item
-          targetArrayStoreItem.value.unshift(createStoreItem(item));
-
-          // notify subscribers
-          watchers.current.emit(dotpath, targetArrayStoreItem);
-        },
-
-        move: (path: PathFormPath, fromIndex: number, toIndex: number) => {
-          const dotpath = toDotPath(path);
-          const targetArrayStoreItem = get(state.current.store, toStorePath(path));
-
-          // validate that the target value is an array
-          if (targetArrayStoreItem?.type !== 'array' || !Array.isArray(targetArrayStoreItem?.value)) {
-            throw new TypeError(`The target path "${dotpath}" is not an array.`);
-          }
-
-          // mutate the target array
-          arrayMove(targetArrayStoreItem.value, fromIndex, toIndex);
-
-          // notify subscribers
-          watchers.current.emit(dotpath, targetArrayStoreItem);
-        },
-
-        remove: (path: PathFormPath, index: number) => {
-          const dotpath = toDotPath(path);
-          const targetArrayStoreItem = get(state.current.store, toStorePath(path));
-
-          // validate that the target value is an array
-          if (targetArrayStoreItem?.type !== 'array' || !Array.isArray(targetArrayStoreItem?.value)) {
-            throw new TypeError(`The target path "${dotpath}" is not an array.`);
-          }
-
-          // mutate the target array
-          arrayRemove(targetArrayStoreItem.value, index);
-
-          // notify subscribers
-          watchers.current.emit(dotpath, targetArrayStoreItem);
-        },
-      },
-    };
-  }, [state, watchers]);
-}
-
 export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defaultValue }) => {
   const name = usePathFormDotPath(path);
-  const { value, meta } = usePathFormValue(path, defaultValue); // TODO defaultValue needed?
-
-  const { setValue, setTouched, clearError } = usePathFormActions();
+  const [value, meta] = usePathFormValue(path, defaultValue); // TODO defaultValue needed?
+  const { setValue, setTouched, clearError } = usePathForm();
 
   const onChange = React.useCallback(
     (event: any) => {
@@ -543,7 +527,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
 
 export const PathFormArray: React.FC<PathFormFieldProps> = ({ path, render }) => {
   const { state } = usePathForm();
-  const { value: rows } = usePathFormValue(path);
+  const [rows] = usePathFormValue(path);
 
   return rows?.length
     ? rows.map((row: any, index: number) => {

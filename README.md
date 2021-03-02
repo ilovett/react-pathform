@@ -1,11 +1,12 @@
-# pathform
+# react-pathform
 
 Pathform was built to scratch an itch for recursive, nested, dynamic forms.
 Using paths as an array, we can spread dynamic paths around like butter.
-With a path we can select and mutate values in the store.
+We can derive a lot from the path, keeping our JSX clean and simple.
 
-Values in the store are either an object, array, or primitive.  Objects and Arrays
-can have child items.  Primitives are leaf nodes and do not have any children.
+Values in the store are either an object, array, or primitive.
+Objects and Arrays can have child items.
+Primitives are leaf nodes and do not have any children.
 
 ![explaining pathform to people who prefer other form libraries](https://i.imgflip.com/4x9w4x.jpg)
 
@@ -14,6 +15,14 @@ can have child items.  Primitives are leaf nodes and do not have any children.
 ```bash
 npm install --save react-pathform
 ```
+
+# Example Code
+
+Check out the [example app](./example/README.md)
+
+# API
+
+Coming soon.
 
 # TODO Checklist
 
