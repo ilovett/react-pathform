@@ -36,22 +36,8 @@ describe('toStorePath', () => {
   it('works as expected', () => {
     expect(toStorePath(['set'])).toEqual(['set']);
     expect(toStorePath(['set', 0])).toEqual(['set', 'value', 0]);
-    expect(toStorePath(['set', 0, 'obj'])).toEqual([
-      'set',
-      'value',
-      0,
-      'value',
-      'obj',
-    ]);
-    expect(toStorePath(['set', 0, 'obj', 'name'])).toEqual([
-      'set',
-      'value',
-      0,
-      'value',
-      'obj',
-      'value',
-      'name',
-    ]);
+    expect(toStorePath(['set', 0, 'obj'])).toEqual(['set', 'value', 0, 'value', 'obj']);
+    expect(toStorePath(['set', 0, 'obj', 'name'])).toEqual(['set', 'value', 0, 'value', 'obj', 'value', 'name']);
 
     // string integers `'0'` converted to object paths
     // prettier-ignore
@@ -61,28 +47,13 @@ describe('toStorePath', () => {
 
 describe('fromDotPath', () => {
   it('parses dotpath as expected', () => {
-    expect(fromDotPath('items[0].nested.name')).toEqual([
-      'items',
-      0,
-      'nested',
-      'name',
-    ]);
+    expect(fromDotPath('items[0].nested.name')).toEqual(['items', 0, 'nested', 'name']);
 
     // parenthesis `[#]` imply array
-    expect(fromDotPath('items[100].nested.name')).toEqual([
-      'items',
-      100,
-      'nested',
-      'name',
-    ]);
+    expect(fromDotPath('items[100].nested.name')).toEqual(['items', 100, 'nested', 'name']);
 
     // dots `.#.` imply object
-    expect(fromDotPath('items.100.nested.name')).toEqual([
-      'items',
-      '100',
-      'nested',
-      'name',
-    ]);
+    expect(fromDotPath('items.100.nested.name')).toEqual(['items', '100', 'nested', 'name']);
   });
 });
 
