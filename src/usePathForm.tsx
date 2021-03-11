@@ -519,7 +519,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
       value,
       onChange,
       onBlur,
-      key: meta?.uuid, // not sure about using key on everything yet...
+      // key: meta?.uuid, // not sure about using key on everything yet... probably should not be included on inputProps
     },
     meta
   );
