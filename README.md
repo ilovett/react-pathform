@@ -117,6 +117,10 @@ Use this hook from any child component scope to access the context of your form.
 
 Returns the form context provider `object` with helper functions:
 
+```ts
+const { setValue, setTouched, addError, clearError, array } = usePathForm();
+```
+
 #### `setValue(path: PathFormPath, value: any)`
 
 Sets the store item `value` at the given `path`.
@@ -137,12 +141,15 @@ Clears an `error` at the given `path`.
 
 An object of utilities for mutating array items in your form.
 
+```tsx
+const { array } = usePathForm();
+```
+
 ##### `append function(path: PathFormPath, item: any)`
 
 Appends an `item` to the end of the array at given `path`.
 
 ```tsx
-const { array } = usePathForm();
 array.append(["deeply", "nested", "items"], { "name": "Santa's Little Helper" });
 ```
 
@@ -151,7 +158,6 @@ array.append(["deeply", "nested", "items"], { "name": "Santa's Little Helper" })
 Prepends an `item` to the beginning of the array at given `path`.
 
 ```tsx
-const { array } = usePathForm();
 array.prepend(["deeply", "nested", "items"], { "name": "Santa's Little Helper" });
 ```
 
@@ -160,7 +166,6 @@ array.prepend(["deeply", "nested", "items"], { "name": "Santa's Little Helper" }
 Moves an `item` in the array at given `path`, from the `fromIndex` to the `toIndex`.  Useful for reordering items.
 
 ```tsx
-const { array } = usePathForm();
 array.move(["deeply", "nested", "items"], 3, 4);
 ```
 
@@ -169,8 +174,7 @@ array.move(["deeply", "nested", "items"], 3, 4);
 Removes an `item` from the array at given `path` at `index`.
 
 ```tsx
-const { array } = usePathForm();
-array.move(["deeply", "nested", "items"], 3, 4);
+array.remove(["deeply", "nested", "items"], 2);
 ```
 
 <br/><br/><br/>
