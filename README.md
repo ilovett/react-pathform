@@ -3,7 +3,7 @@
 Pathform was built to scratch an itch for recursive, nested, dynamic forms.
 Using paths as an array, we can spread dynamic paths around like butter.
 
-We can derive a lot from the [path](#PathFormPath)... [Why?](#But-Y-Tho)
+We can derive a lot from the [path as array](#PathFormPath)...[ Why is this useful?](#But-Y-Tho)
 
 ## Quick Start
 
@@ -49,6 +49,8 @@ function App() {
 ```
 [Try It on CodeSandbox](https://codesandbox.io/s/immutable-pond-qrkrn?file=/src/App.tsx)
 
+<br/><br/>
+
 ## Example Code
 
 Check out the [Example App](./example/README.md)
@@ -56,6 +58,8 @@ Check out the [Example App](./example/README.md)
 ### CodeSandbox Examples
 
 - [Simplest Example](https://codesandbox.io/s/immutable-pond-qrkrn?file=/src/App.tsx)
+
+<br/><br/>
 
 ## API
 
@@ -68,48 +72,88 @@ Check out the [Example App](./example/README.md)
   - [usePathForm](#usePathForm)
   - [usePathFormValue](#usePathFormValue)
 
+  <br/><br/>
+
 ### PathFormProvider (required)
 
 The store context provider for your form.  You must place it at the root of your form to be able to use `usePathForm`, and `PathForm*` components.
 The data in the store will remain until the `PathFormProvider` is unmounted.
 
-|Prop|Type|Description
-|-|-|-
-|initialRenderValues|any|The data for your form on the *initial render only*.
+#### PathFormProvider `initialRenderValues: values`
+
+The initial data for your form on the *initial render only*.
+
+<br/><br/>
 
 ### PathForm
 
-Replaces a native `form` element and allows you to hook into `onValidate` and `onSubmit`.
+Renders a browser native `form` element and allows you to hook into `onValidate` and `onSubmit`.
 
-|Prop|Type|Description
-|-|-|-
-|onValidate|callback(values) or Promise<callback(values)>|Called just before submitting.
-|onSubmit|callback(values) or Promise<callback(values)>|Called if validation passes for submission.
+#### PathForm `onValidate: (values: any)`
+
+Called just before submitting.  Throw an error to stop `onSubmit` from triggering.
+
+#### PathForm `onSubmit: (values: any)`
+
+Called on successful submission after validation.
+
+<br/><br/>
 
 ### PathFormField
 
 Binds to a value at the given path in the store from.
 
-|Prop|Type|Required|Description
-|------|---------|----------|----
-|path*|PathFormPath|Yes|The path selector to the item in your store.
-|render*|callback(inputProps, meta)|No|The callback to render your component.<br /><br/>**inputProps** The input props for your form component.<br />**meta** Meta properties of the store item.
-|defaultValue|any|No|The value use on the initial render, if the store item does not already exist.<br />If not set, you may receive a warning about switching from uncontrolled to controlled.
+#### PathFormField `path: PathFormPath`
+
+The path selector to the item in your store.
+
+#### PathFormField `defaultValue: any[]`
+
+The value use on the initial render, if the store item does not already exist.
+
+#### PathFormField `render(inputProps: PathFormInputProps, meta: PathFormStoreMeta)`
+
+The callback to render the field.
+
+- inputProps: [PathFormInputProps](#PathFormInputProps)
+- meta: [PathFormStoreMeta](#PathFormStoreMeta)
+
+<br/><br/>
 
 ### PathFormArray
 
 Binds to an array at the given path in the store from.  The `render` callback will be called for
 each item in the array.<br/>
 Use the `meta.uuid` on your root item `key`.<br/>
-EG: `key={meta.uuid}`
 
-|Prop|Type|Required|Description
-|------|---------|----------|----
-|path*|PathFormPath|Yes|The path selector to the item in your store.
-|render*|callback(arrayProps, meta)|No|The callback to render your component.<br/><br/>**inputProps** The input props for your form component.<br />**meta** Meta properties of the store item.
-|defaultValue|any|No|The value use on the initial render, if the store item does not already exist.
+```tsx
+<PathFormArray
+  path={['path', 'to', 'array']}
+  defaultValue={[]}
+  render={(arrayProps, meta) => (
+    <Item key={meta.uuid} />
+  )}
+  renderEmpty={() => <>No Items!</>}
+/>
+```
 
-<br/><br/><br/>
+#### PathFormArray `path: PathFormPath`
+
+The path selector to the item in your store.
+
+#### PathFormArray `defaultValue: any[]`
+
+The value use on the initial render, if the store item does not already exist.
+
+#### PathFormArray `render(arrayProps: PathFormArrayProps, meta: PathFormStoreMeta)`
+
+The callback to render an item in the array.
+
+#### PathFormArray `renderEmpty(arrayProps: TODO, meta: TODO)`
+
+The callback of what to render when the array is empty.
+
+<br/><br/>
 
 ### usePathForm
 
@@ -177,7 +221,7 @@ Removes an `item` from the array at given `path` at `index`.
 array.remove(["deeply", "nested", "items"], 2);
 ```
 
-<br/><br/><br/>
+<br/><br/>
 
 ### usePathFormValue
 
@@ -187,6 +231,8 @@ Returns an array of `[value, meta]` at the given `path`.
 const [nameValue, nameMeta] = usePathFormValue(['person', 'name']);
 const [ageValue, ageMeta] = usePathFormValue(['person', 'age']);
 ```
+
+<br/><br/>
 
 ## Types
 
@@ -199,6 +245,19 @@ const path: PathFormPath = ["deeply", "nested", "items", 0, "children", 0, "name
 ```
 
 The path to an item in your form.<br/>Strings imply object property.<br/>Numbers imply array index.
+
+### PathFormInputProps
+
+The input props to hook your store into your component.
+
+```ts
+type PathFormInputProps = {
+  name: string;
+  value: any;
+  onChange: (event?: any, value?: any) => any;
+  onBlur: (event?: any) => any;
+}
+```
 
 ### PathFormError
 
@@ -220,6 +279,8 @@ type PathFormStoreMeta = {
   error: null;
 };
 ```
+
+<br/><br/>
 
 ## But Y Tho?
 
@@ -253,6 +314,8 @@ Values in the store are either an object, array, or primitive.
 Objects and Arrays can have both child items, but only array is iterable.<br />
 Primitive values cannot have any children.
 
+<br/><br/>
+
 ## Feature Checklist
 
 | Category | Criteria | Complete |
@@ -260,14 +323,14 @@ Primitive values cannot have any children.
 | README | Feature Checklist | &#9745; |
 | README | Quick Start | &#9745; |
 | README | Simple CodeSandbox | &#9745; |
-| README | API | &#9744; |
-| Library | onValidate | &#9744; |
-| Library | onSubmit | &#9744; |
+| README | API | &#9745; |
+| Library | onValidate | &#9745; |
+| Library | onSubmit | &#9745; |
 | Library | reset | &#9744; |
 | Library | touched & validation | &#9744; |
 | Library | Built in validation | &#9744; |
+| Examples | Codesandbox | &#9745; |
 | Examples | Example App | &#9744; |
-| Examples | Codesandbox | &#9744; |
 | Bundle Size | Optimize UUID | &#9744; |
 | Bundle Size | Optimize Lodash | &#9744; |
 | README | Contributing | &#9744; |

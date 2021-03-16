@@ -296,6 +296,7 @@ interface PathFormFieldProps {
   path: PathFormPath;
   defaultValue: any; // TODO generics?
   render: (props: any, meta: any) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
+  renderEmpty?: (props: any, meta: any) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
 }
 
 export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, initialRenderValues }) => {
@@ -523,52 +524,4 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
     },
     meta
   );
-};
-
-export const PathFormArray: React.FC<PathFormFieldProps> = ({ path, render }) => {
-  const { state } = usePathForm();
-  const [rows] = usePathFormValue(path);
-
-  return rows?.length
-    ? rows.map((row: any, index: number) => {
-        const isLast = index + 1 === rows.length;
-        const isFirst = index === 0;
-        const totalRows = rows.length;
-        const arrayPath = path;
-        const itemPath = [...arrayPath, index];
-        const storeItem = get(state.current.store, toStorePath(itemPath));
-        const { meta } = storeItem || {}; // TODO default
-
-        return (
-          <PathFormArrayRow
-            key={meta?.key || index}
-            {...{
-              arrayPath,
-              itemPath,
-              index,
-              isLast,
-              isFirst,
-              totalRows,
-              meta,
-              render,
-            }}
-          />
-        );
-      })
-    : null;
-};
-
-type PathFormArrayRowProps = {
-  arrayPath: PathFormPath;
-  itemPath: PathFormPath;
-  index: number;
-  isLast: boolean;
-  isFirst: boolean;
-  totalRows: number;
-  meta: PathFormStoreMeta; // TODO
-  render: (props: any, meta: any) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
-};
-
-const PathFormArrayRow: React.FC<PathFormArrayRowProps> = ({ render, meta, ...props }) => {
-  return render(props, meta);
 };

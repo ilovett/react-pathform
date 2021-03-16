@@ -8,7 +8,13 @@ export const validateYupSchema = (schema: any) => async (values: any, addError: 
     err?.inner?.forEach?.((validationError: any) => {
       const path = fromDotPath(validationError.path);
       const { type, message, value } = validationError;
-      addError(path, { type, message, value });
+      try {
+        addError(path, { type, message, value });
+      } catch (err) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(err);
+        }
+      }
     });
 
     // bubble up yup schema error, stops submission
