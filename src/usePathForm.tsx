@@ -1,5 +1,5 @@
 import React from 'react';
-import { set, get, mapValues, uuid } from './utils';
+import { set, get, mapValues, uuid, typeOf } from './utils';
 
 export type PathFormValuePrimitive = string | number | boolean | null;
 
@@ -14,6 +14,8 @@ export type PathFormStoreMeta = {
   touched: boolean;
   error: null; // TODO
 };
+
+export type PathFormValueType = 'primitive' | 'object' | 'array';
 
 export type PathFormStorePrimitive = {
   type: 'primitive';
@@ -312,13 +314,33 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
 
   const setValue = (path: PathFormPath, value: any) => {
     const storePath = toStorePath(path);
-    const storeItem = get(state.current.store, storePath); // TODO default value based on value here?
-
-    // TODO if storeItem not found / setup new storeItem
+    const storeItem = get(state.current.store, storePath) as PathFormStoreItem; // TODO default value based on value here?
 
     // only update store & emit to subscribers if value changed
+    // TODO performance protect against non primitive types, EG: comparing `[] !== []` is true
     if (storeItem?.value !== value) {
-      set(state.current.store, [...storePath, 'value'], value);
+      const newValueType = typeOf(value);
+
+      // no store item exists at the given path, set it up!
+      if (!storeItem) {
+        set(state.current.store, storePath, createStoreItem(value));
+      }
+      // if new type is primitive, simply update the value
+      else if (newValueType === 'primitive') {
+        set(state.current.store, [...storePath, 'type'], 'primitive');
+        set(state.current.store, [...storePath, 'value'], value);
+      }
+      // otherwise arrays items and object properties need to be converted to store items
+      else if (newValueType === 'array' || newValueType === 'object') {
+        const newStoreItem = createStoreItem(value);
+
+        // keep the existing uuid but change the type and value
+        set(state.current.store, [...storePath, 'type'], newValueType);
+        set(state.current.store, [...storePath, 'value'], newStoreItem.value);
+      } else {
+        throw new Error('Unhandled setValue case.');
+      }
+
       watchers.current.emit(toDotPath(path), value);
     }
   };
@@ -471,7 +493,8 @@ export const usePathFormValue = (path: PathFormPath, defaultValue?: any) => {
     return () => unsubscribe();
   }, [dotpath, watchers]);
 
-  const { meta = {}, value = defaultValue } = storeItem || {};
+  const meta = storeItem?.meta || {};
+  const value = storeItem?.value ? parseStoreItem(storeItem) : defaultValue;
 
   // renders is increased, but `value` and `meta` are pulled at the time of render
   return React.useMemo(() => {
