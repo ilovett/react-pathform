@@ -1,5 +1,5 @@
 import React from 'react';
-import { PathFormPath, PathFormStoreMeta, toStorePath, usePathForm, usePathFormValue } from './usePathForm';
+import { PathFormPath, PathFormStoreMeta, toStorePath, usePathForm, usePathFormValue } from '.';
 import { get } from './utils';
 
 interface PathFormArrayProps {

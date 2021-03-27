@@ -1,4 +1,4 @@
-import { fromDotPath } from './usePathForm';
+import { fromDotPath } from '.';
 
 export const validateYupSchema = (schema: any) => async (values: any, addError: any) => {
   try {

@@ -8,7 +8,7 @@ import {
   parseStoreItemArray,
   parseStoreItemPrimitive,
   fromDotPath,
-} from './usePathForm';
+} from './utils';
 
 let mockUuidCounter = 1;
 let mockUuid = jest.fn().mockImplementation(() => {

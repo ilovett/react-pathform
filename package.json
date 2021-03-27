@@ -30,17 +30,19 @@
     "uuid": "^3.4.0"
   },
   "peerDependencies": {
-    "react": ">=16"
+    "react": ">=16.9.0"
   },
   "devDependencies": {
     "@size-limit/preset-small-lib": "^4.9.2",
+    "@testing-library/react-hooks": "^5.1.0",
     "@types/lodash": "^4.14.168",
-    "@types/react": "^16.0.0",
-    "@types/react-dom": "^16.0.0",
+    "@types/react": "^16.9.0",
+    "@types/react-dom": "^16.9.0",
     "@types/uuid": "^8.3.0",
     "husky": "^5.0.9",
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
+    "react-test-renderer": "^16.14.0",
     "size-limit": "^4.9.2",
     "tsdx": "^0.14.1",
     "tslib": "^2.1.0",
