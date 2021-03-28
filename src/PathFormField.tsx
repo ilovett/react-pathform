@@ -4,13 +4,13 @@ import { PathFormPath, usePathForm, usePathFormDotPath, usePathFormValue } from 
 interface PathFormFieldProps {
   path: PathFormPath;
   defaultValue: any; // TODO generics?
-  render: (props: any, meta: any) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
-  renderEmpty?: (props: any, meta: any) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
+  render: (props: any, meta: any, renders: number) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
+  renderEmpty?: (props: any, meta: any, renders: number) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
 }
 
 export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defaultValue }) => {
   const name = usePathFormDotPath(path);
-  const [value, meta] = usePathFormValue(path, defaultValue); // TODO defaultValue needed?
+  const [value, meta, renders] = usePathFormValue(path, defaultValue); // TODO defaultValue needed?
   const { setValue, setTouched, clearError } = usePathForm();
 
   const onChange = React.useCallback(
@@ -51,6 +51,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
       onBlur,
       // key: meta?.uuid, // not sure about using key on everything yet... probably should not be included on inputProps
     },
-    meta
+    meta,
+    renders
   );
 };

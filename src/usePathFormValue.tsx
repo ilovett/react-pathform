@@ -3,7 +3,7 @@ import { PathFormPath, usePathForm, usePathFormDotPath, usePathFormStorePath, cr
 
 export const usePathFormValue = (path: PathFormPath, defaultValue?: any) => {
   // internal state is how we force trigger re-render, by increase renders
-  const [, setRenders] = React.useState(0);
+  const [renders, setRenders] = React.useState(0);
   const { state, watchers } = usePathForm();
   const dotpath = usePathFormDotPath(path);
   const storePath = usePathFormStorePath(path);
@@ -37,6 +37,6 @@ export const usePathFormValue = (path: PathFormPath, defaultValue?: any) => {
 
   // renders is increased, but `value` and `meta` are pulled at the time of render
   return React.useMemo(() => {
-    return [value, meta];
-  }, [value, meta]);
+    return [value, meta, renders];
+  }, [value, meta, renders]);
 };

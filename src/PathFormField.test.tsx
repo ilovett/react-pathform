@@ -18,12 +18,13 @@ describe('PathFormField', () => {
       <PathFormField
         path={['nested', 'items', 0, 'name']}
         defaultValue="default"
-        render={(inputProps, meta) => {
+        render={(inputProps, meta, renders) => {
           return (
             <div>
               <label htmlFor="name">Name</label>
               <input id="name" {...inputProps} />
               <pre data-testid="meta">{JSON.stringify(meta)}</pre>
+              <pre data-testid="renders">{JSON.stringify(renders)}</pre>
             </div>
           );
         }}
@@ -41,6 +42,13 @@ describe('PathFormField', () => {
       </pre>
     `);
     expect(getByLabelText(container, 'Name')).toHaveDisplayValue('Joey Joe Joe Jr. Shabadoo');
+    expect(getByTestId(container, 'renders')).toMatchInlineSnapshot(`
+      <pre
+        data-testid="renders"
+      >
+        0
+      </pre>
+    `);
   });
 
   it('user can type and modify the value in the store', async () => {
@@ -49,5 +57,8 @@ describe('PathFormField', () => {
 
     // new text appended
     expect(getByLabelText(container, 'Name')).toHaveDisplayValue(/ new text$/);
+
+    // rendered 9 times due to typing 9 characters
+    expect(getByTestId(container, 'renders')).toHaveTextContent('9');
   });
 });
