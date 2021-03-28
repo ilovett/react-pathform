@@ -44,7 +44,7 @@ export const PathFormArray: React.FC<PathFormArrayProps> = ({ path, render, rend
   ) : null;
 };
 
-type PathFormArrayItemProps = {
+export type PathFormArrayItemProps = {
   arrayPath: PathFormPath;
   itemPath: PathFormPath;
   index: number;
