@@ -1,11 +1,24 @@
 import React from 'react';
-import { PathFormPath, usePathForm, usePathFormDotPath, usePathFormValue } from '.';
+import { PathFormPath, PathFormStoreMeta, usePathForm, usePathFormDotPath, usePathFormValue } from '.';
+
+export interface PathFormInputProps {
+  name: string;
+  value: any;
+  onChange: (event?: any, value?: any) => any;
+  onBlur: (event?: any) => any;
+}
+
+export interface PathFormFieldRenderProps {
+  inputProps: PathFormInputProps;
+  meta: PathFormStoreMeta;
+  renders: number;
+}
 
 interface PathFormFieldProps {
   path: PathFormPath;
   defaultValue: any; // TODO generics?
-  render: (props: any, meta: any, renders: number) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
-  renderEmpty?: (props: any, meta: any, renders: number) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
+  render: (props: PathFormFieldRenderProps) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
+  renderEmpty?: (props: PathFormFieldRenderProps) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
 }
 
 export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defaultValue }) => {
@@ -43,15 +56,14 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
     [path, clearError, setTouched, meta]
   );
 
-  return render(
-    {
+  return render({
+    inputProps: {
       name,
       value,
       onChange,
       onBlur,
-      // key: meta?.uuid, // not sure about using key on everything yet... probably should not be included on inputProps
     },
     meta,
-    renders
-  );
+    renders,
+  });
 };

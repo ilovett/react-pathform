@@ -18,7 +18,7 @@ describe('PathFormField', () => {
       <PathFormField
         path={['nested', 'items', 0, 'name']}
         defaultValue="default"
-        render={(inputProps, meta, renders) => {
+        render={({ inputProps, meta, renders }) => {
           return (
             <div>
               <label htmlFor="name">Name</label>
