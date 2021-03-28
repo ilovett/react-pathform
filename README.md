@@ -29,7 +29,7 @@ function App() {
         <PathFormField
           path={["nested", "items", 0, "name"]}
           defaultValue=""
-          render={(inputProps, meta) => {
+          render={({ inputProps, meta }) => {
             return (
               <TextField
                 label="Name"
@@ -111,12 +111,9 @@ The path selector to the item in your store.
 
 The value use on the initial render, if the store item does not already exist.
 
-#### PathFormField `render(inputProps: PathFormInputProps, meta: PathFormStoreMeta)`
+#### PathFormField `render(props: PathFormFieldProps)`
 
 The callback to render the field.
-
-- inputProps: [PathFormInputProps](#PathFormInputProps)
-- meta: [PathFormStoreMeta](#PathFormStoreMeta)
 
 <br/><br/>
 
@@ -130,8 +127,11 @@ Use the `meta.uuid` on your root item `key`.<br/>
 <PathFormArray
   path={['path', 'to', 'array']}
   defaultValue={[]}
-  render={(arrayProps, meta) => (
-    <Item key={meta.uuid} />
+  renderItem={({ arrayPath, itemPath, index, totalRows, meta }) => (
+    <div key={meta.uuid}>
+      <NameField key={meta.uuid} path={[...itemPath, 'name']} />
+      <button onClick={() => array.remove(arrayPath, index)} disabled={totalRows <= 1}>Delete</button>
+    </div>
   )}
   renderEmpty={() => <>No Items!</>}
 />
@@ -145,11 +145,11 @@ The path selector to the item in your store.
 
 The value use on the initial render, if the store item does not already exist.
 
-#### PathFormArray `render(arrayProps: PathFormArrayProps, meta: PathFormStoreMeta)`
+#### PathFormArray `renderItem(props: PathFormArrayItemProps)`
 
 The callback to render an item in the array.
 
-#### PathFormArray `renderEmpty(arrayProps: TODO, meta: TODO)`
+#### PathFormArray `renderEmpty(props: PathFormArrayEmptyProps)`
 
 The callback of what to render when the array is empty.
 

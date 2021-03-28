@@ -17,12 +17,12 @@ describe('PathFormArray', () => {
       <PathFormArray
         path={['items']}
         defaultValue={[]}
-        render={(arrayProps, meta) => {
+        renderItem={({ itemPath, meta }) => {
           return (
             <PathFormField
-              path={[...arrayProps.itemPath, 'name']}
+              path={[...itemPath, 'name']}
               defaultValue=""
-              render={(inputProps, meta, renders) => (
+              render={({ inputProps, meta, renders }) => (
                 <div>
                   <label htmlFor={`name-${meta.uuid}`}>Name</label>
                   <input id={`name-${meta.uuid}`} {...inputProps} />
