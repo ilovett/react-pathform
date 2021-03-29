@@ -73,7 +73,7 @@ export const PathFormArray: React.FC<PathFormArrayProps> = ({ path, renderItem, 
       );
     })
   ) : renderEmpty ? (
-    <PathFormArrayWrapperEmpty key={meta?.key} renderEmpty={renderEmpty} emptyProps={{ arrayPath, meta }} />
+    <PathFormArrayWrapperEmpty key={meta.uuid} renderEmpty={renderEmpty} emptyProps={{ arrayPath, meta }} />
   ) : null;
 };
 
