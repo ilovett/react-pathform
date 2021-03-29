@@ -2,13 +2,6 @@ import React from 'react';
 import { PathFormPath, PathFormStoreMeta, toStorePath, usePathForm, usePathFormValue } from '.';
 import { get } from './utils';
 
-export interface PathFormInputProps {
-  name: string;
-  value: any;
-  onChange: (event?: any, value?: any) => any;
-  onBlur: (event?: any) => any;
-}
-
 export type PathFormArrayItemProps = {
   arrayPath: PathFormPath;
   itemPath: PathFormPath;

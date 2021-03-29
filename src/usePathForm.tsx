@@ -12,6 +12,8 @@ import {
   eventEmitter,
   parseStore,
 } from '.';
+import { usePathFormDotPath } from './usePathFormDotPath';
+import { usePathFormStorePath } from './usePathFormStorePath';
 
 export type PathFormValuePrimitive = string | number | boolean | null;
 
@@ -20,11 +22,19 @@ export type PathFormState = {
   defaults: object;
 };
 
+export type PathFormPath = Array<string | number>; // | string;
+
+export type PathFormError = {
+  type: string;
+  message: string;
+  value: any;
+};
+
 export type PathFormStoreMeta = {
   uuid: string;
   dirty: boolean;
   touched: boolean;
-  error: null; // TODO
+  error: null | PathFormError; // TODO
 };
 
 export type PathFormValueType = 'primitive' | 'object' | 'array';
@@ -75,6 +85,7 @@ type PathFormStateContext = {
   array: PathFormArrayUtils;
   getValues: () => any;
   setValue: (path: PathFormPath, value: any) => any;
+  setDirty: (path: PathFormPath, dirty: boolean) => any;
   setTouched: (path: PathFormPath, touched: boolean) => any;
   addError: (path: PathFormPath, error: PathFormError) => any;
   clearError: (path: PathFormPath) => any;
@@ -98,14 +109,6 @@ interface PathFormProviderProps {
   initialRenderValues?: any; // TODO generics or something
   children: React.ReactNode;
 }
-
-export type PathFormPath = Array<string | number>; // | string;
-
-export type PathFormError = {
-  type: string;
-  message: string;
-  value: any;
-};
 
 export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, initialRenderValues }) => {
   const state = React.useRef({
@@ -151,8 +154,25 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
     }
   };
 
+  const setDirty = (path: PathFormPath, dirty: boolean) => {
+    const dotpath = toDotPath(path); // cant use hooks inside
+    const storePath = toStorePath(path);
+    const storeItem = get(state.current.store, storePath);
+
+    // validate that the target store item exists
+    if (storeItem === undefined) {
+      throw new Error(`The target path "${dotpath}" does not exist.`);
+    }
+
+    // mutate the target store item
+    set(state.current.store, [...storePath, 'meta', 'dirty'], dirty);
+
+    // notify subscribers
+    watchers.current.emit(dotpath, storeItem);
+  };
+
   const setTouched = (path: PathFormPath, touched: boolean) => {
-    const dotpath = toDotPath(path);
+    const dotpath = toDotPath(path); // cant use hooks inside
     const storePath = toStorePath(path);
     const storeItem = get(state.current.store, storePath);
 
@@ -251,7 +271,7 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
   };
 
   return (
-    <PathFormStateContext.Provider value={{ state, watchers, array, getValues, setValue, addError, clearError, setTouched }}>
+    <PathFormStateContext.Provider value={{ state, watchers, array, getValues, setValue, addError, clearError, setTouched, setDirty }}>
       {children}
     </PathFormStateContext.Provider>
   );

@@ -2,7 +2,7 @@ import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { PathFormArray, PathFormField, PathFormProvider, usePathForm, usePathFormActions } from '../.';
+import { PathFormArray, PathFormField, PathFormProvider, usePathForm } from '../.';
 import { Button, Checkbox, FormControlLabel, IconButton, TextField, Tooltip } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 
@@ -48,15 +48,20 @@ const App = () => {
   );
 };
 
-const Person = ({ path, arrayProps }) => {
-  const { array } = usePathFormActions();
+const Person = ({ path, totalRows, arrayPath, index }) => {
+  const { array, state, getValues } = usePathForm();
+
+  (window as any).state = state;
+  (window as any).getValues = getValues;
+
   return (
     <>
       <PathFormField
         path={[...path, 'name']}
         defaultValue=""
-        render={(inputProps, meta) => {
+        render={({ inputProps, meta, renders }) => {
           console.count(`RENDER COUNT ${inputProps.name}`);
+          console.info({ meta, renders });
           return <TextField label="Name" {...inputProps} />;
         }}
       />
@@ -64,8 +69,9 @@ const Person = ({ path, arrayProps }) => {
       <PathFormField
         path={[...path, 'age']}
         defaultValue=""
-        render={(inputProps, meta) => {
+        render={({ inputProps, meta, renders }) => {
           console.count(`RENDER COUNT ${inputProps.name}`);
+          console.info({ meta, renders });
           return <TextField label="Age" {...inputProps} />;
         }}
       />
@@ -73,11 +79,11 @@ const Person = ({ path, arrayProps }) => {
       <PathFormField
         path={[...path, 'someOption']}
         defaultValue={false}
-        render={({ onChange, value, ...inputProps }) => {
+        render={({ inputProps: { onChange, value, ...inputProps } }) => {
           return (
             <FormControlLabel
               label="Some Option"
-              control={<Checkbox color="primary" checked={value} onChange={(event, value) => onChange(value)} />}
+              control={<Checkbox color="primary" checked={value} onChange={(event, value) => onChange(value)} {...inputProps} />}
               {...inputProps}
               style={{ maxWidth: 215 }}
             />
@@ -85,14 +91,14 @@ const Person = ({ path, arrayProps }) => {
         }}
       />
 
-      <Tooltip title={arrayProps.totalRows > 1 ? 'Delete' : 'At least one required'}>
+      <Tooltip title={totalRows > 1 ? 'Delete' : 'At least one required'}>
         <span>
           <IconButton
-            disabled={arrayProps.totalRows <= 1}
+            disabled={totalRows <= 1}
             onClick={() => {
               if (window.confirm('Are you sure you want to remove this?')) {
                 // TODO should take one full path or path and index
-                array.remove(arrayProps.arrayPath, arrayProps.index);
+                array.remove(arrayPath, index);
               }
             }}
           >
@@ -105,15 +111,14 @@ const Person = ({ path, arrayProps }) => {
 };
 
 const MyForm = () => {
-  // TODO combine to `usePathForm`
-  const { array } = usePathFormActions();
+  const { array } = usePathForm();
 
   return (
     <>
       <PathFormArray
         path={['things']}
         defaultValue={[]}
-        render={(props, meta) => {
+        renderItem={({ totalRows, arrayPath, itemPath, index, meta }) => {
           // TODO i should have meta.dotpath here?
           console.count(`RENDER COUNT ${meta.uuid}`);
 
@@ -121,7 +126,7 @@ const MyForm = () => {
 
           return (
             <div key={meta.uuid} style={{ display: 'flex', alignItems: 'center' }}>
-              <Person path={props.itemPath} arrayProps={props} />
+              <Person path={itemPath} totalRows={totalRows} arrayPath={arrayPath} index={index} />
             </div>
           );
         }}

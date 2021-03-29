@@ -24,15 +24,14 @@ interface PathFormFieldProps {
 export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defaultValue }) => {
   const name = usePathFormDotPath(path);
   const [value, meta, renders] = usePathFormValue(path, defaultValue); // TODO defaultValue needed?
-  const { setValue, setTouched, clearError } = usePathForm();
+  const { setValue, setTouched, setDirty, clearError } = usePathForm();
 
   const onChange = React.useCallback(
     (event: any) => {
       // TODO handle all sorts of values
       const value = event?.target?.value ?? event;
-      setValue(path, value); // TODO { shouldValidate: shouldValidate, shouldDirty: true }
-
-      // TODO dirty ? or do that in setValue ?
+      setValue(path, value);
+      setDirty(path, true);
     },
     [path, setValue]
   );
@@ -48,8 +47,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
         clearError(path);
       }
 
-      // TODO why is meta not updating correctly on some of these?
-      if (meta?.touched === false) {
+      if (meta.touched !== true) {
         setTouched(path, true);
       }
     },
