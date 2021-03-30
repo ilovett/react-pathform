@@ -35,8 +35,10 @@ export const usePathFormValue = (path: PathFormPath, defaultValue?: any): [any, 
     return () => unsubscribe();
   }, [dotpath, watchers]);
 
+  // TODO handle no storeItem set
+
   const meta = storeItem?.meta || defaultStoreItemValue.meta;
-  const value = storeItem?.value ? parseStoreItem(storeItem) : defaultValue;
+  const value = !!storeItem?.type ? parseStoreItem(storeItem) : defaultValue;
 
   // renders is increased, but `value` and `meta` are pulled at the time of render
   return React.useMemo(() => {
