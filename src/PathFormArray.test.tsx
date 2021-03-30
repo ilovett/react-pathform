@@ -10,10 +10,9 @@ const TestWrapper: React.FC = ({ children }) => {
 
 describe('PathFormArray', () => {
   let container: HTMLElement;
-  let debug: any;
 
   beforeEach(() => {
-    ({ container, debug } = render(
+    ({ container } = render(
       <PathFormArray
         path={['items']}
         defaultValue={[]}

@@ -12,8 +12,6 @@ import {
   eventEmitter,
   parseStore,
 } from '.';
-import { usePathFormDotPath } from './usePathFormDotPath';
-import { usePathFormStorePath } from './usePathFormStorePath';
 
 export type PathFormValuePrimitive = string | number | boolean | null;
 

@@ -33,7 +33,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
       setValue(path, value);
       setDirty(path, true);
     },
-    [path, setValue]
+    [path, setValue, setDirty]
   );
 
   // TODO onBlur, ref
