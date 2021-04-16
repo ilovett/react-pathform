@@ -89,7 +89,7 @@ type PathFormStateContext = {
   clearError: (path: PathFormPath) => any;
 };
 
-type PathFormArrayUtils = {
+export type PathFormArrayUtils = {
   append: (path: PathFormPath, item: any) => any;
   prepend: (path: PathFormPath, item: any) => any;
   remove: (path: PathFormPath, item: any) => any;

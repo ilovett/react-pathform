@@ -97,11 +97,14 @@ export const eventEmitter = () => {
   return Object.freeze({ on, emit });
 };
 
-/** toDotPath
+/**
+ * Convert a `PathFormPath` to dotpath string.
  *
- * Convert an array such as `['items', 0, 'firstName']` to `items[0].firstName`.
+ * @example
+ * toDotPath(['items', 0, 'firstName']);
+ * // returns 'items[0].firstName'
  *
- * @param array An array of strings or numbers of nested objects and arrays.
+ * @param path An array of strings or numbers of nested objects and arrays.
  */
 export const toDotPath = (path: PathFormPath) => {
   if (typeof path === 'string') {
@@ -121,6 +124,10 @@ export const toDotPath = (path: PathFormPath) => {
 /** fromDotPath
  *
  * Convert a dotpath to an PathFormPath.
+ *
+ * @example
+ * fromDotPath('nested.items[0].name');
+ * // returns ['nested', 'items', 0, 'name']
  *
  * @param path
  */

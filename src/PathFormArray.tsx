@@ -1,9 +1,10 @@
 import React from 'react';
-import { PathFormPath, PathFormStoreMeta, toStorePath, usePathForm, usePathFormValue } from '.';
-import { get } from './utils';
+import { PathFormArrayUtils, PathFormPath, PathFormStoreMeta, toStorePath, usePathForm, usePathFormValue } from '.';
+import { createStoreItem, createStoreItemMeta, get, set } from './utils';
 
 export type PathFormArrayItemProps = {
   arrayPath: PathFormPath;
+  arrayUtils: PathFormArrayUtils;
   itemPath: PathFormPath;
   index: number;
   isLast: boolean;
@@ -14,6 +15,7 @@ export type PathFormArrayItemProps = {
 
 export type PathFormArrayEmptyProps = {
   arrayPath: PathFormPath;
+  arrayUtils: PathFormArrayUtils;
   meta: PathFormStoreMeta;
 };
 
@@ -34,9 +36,9 @@ export interface PathFormArrayProps {
   renderEmpty?: (props: PathFormArrayEmptyProps) => React.ReactElement;
 }
 
-export const PathFormArray: React.FC<PathFormArrayProps> = ({ path, renderItem, renderEmpty }) => {
-  const { state } = usePathForm();
-  const [rows, meta] = usePathFormValue(path);
+export const PathFormArray: React.FC<PathFormArrayProps> = ({ path, renderItem, renderEmpty, defaultValue }) => {
+  const { state, array } = usePathForm();
+  const [rows, meta] = usePathFormValue(path, defaultValue);
   const arrayPath = path;
 
   return rows?.length ? (
@@ -45,8 +47,16 @@ export const PathFormArray: React.FC<PathFormArrayProps> = ({ path, renderItem, 
       const isFirst = index === 0;
       const totalRows = rows.length;
       const itemPath = [...arrayPath, index];
-      const storeItem = get(state.current.store, toStorePath(itemPath));
-      const { meta } = storeItem || {}; // TODO default
+
+      let storeItem = get(state.current.store, toStorePath(itemPath));
+
+      // create and set the storeItem if not exists, this is probably first render
+      if (!storeItem) {
+        storeItem = createStoreItem(row);
+        set(state.current.store, toStorePath(itemPath), storeItem);
+      }
+
+      const { meta } = storeItem;
 
       return (
         // TODO reason not to just `renderItem(...)` ? cuz it returns an element ? memo in the future ?
@@ -55,6 +65,7 @@ export const PathFormArray: React.FC<PathFormArrayProps> = ({ path, renderItem, 
           renderItem={renderItem}
           itemProps={{
             arrayPath,
+            arrayUtils: array,
             itemPath,
             index,
             isLast,
@@ -66,7 +77,7 @@ export const PathFormArray: React.FC<PathFormArrayProps> = ({ path, renderItem, 
       );
     })
   ) : renderEmpty ? (
-    <PathFormArrayWrapperEmpty key={meta.uuid} renderEmpty={renderEmpty} emptyProps={{ arrayPath, meta }} />
+    <PathFormArrayWrapperEmpty key={meta.uuid} renderEmpty={renderEmpty} emptyProps={{ arrayPath, arrayUtils: array, meta }} />
   ) : null;
 };
 
