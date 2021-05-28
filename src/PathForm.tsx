@@ -7,7 +7,7 @@ interface PathFormProps extends HTMLAttributes<HTMLFormElement> {
 }
 
 export const PathForm: React.FC<PathFormProps> = ({ onSubmit, onValidate, ...other }) => {
-  const { getValues, addError } = usePathForm();
+  const { getValues, addError, validateStore } = usePathForm();
 
   return (
     // TODO eventually, react native support
@@ -18,14 +18,19 @@ export const PathForm: React.FC<PathFormProps> = ({ onSubmit, onValidate, ...oth
         // never allow default behaviour on native form element
         event.preventDefault();
 
-        // get the current store values
-        const values = getValues();
-
         // async validator handler
-        const validate = async (values: any) => {
+        const v = async () => {
           try {
-            // TODO set validating, submitting, etc.
-            await onValidate?.(values, addError);
+            // get the current store values
+            const values = getValues();
+
+            // use given onValidate if provided
+            if (onValidate) {
+              await onValidate(values, addError);
+            } else {
+              validateStore();
+            }
+
             await onSubmit?.(values);
           } catch (err) {
             // do nothing
@@ -33,7 +38,7 @@ export const PathForm: React.FC<PathFormProps> = ({ onSubmit, onValidate, ...oth
         };
 
         // trigger async validate
-        validate(values);
+        v();
       }}
       {...other}
     />

@@ -2,39 +2,15 @@ import 'react-app-polyfill/ie11';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { PathFormArray, PathFormField, PathFormProvider, usePathForm } from '../.';
+import { PathForm, PathFormArray, PathFormField, PathFormProvider, usePathForm } from '../.';
 import { Button, Checkbox, FormControlLabel, IconButton, TextField, Tooltip } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/DeleteRounded';
 
 const fetchedData = {
   things: [
-    {
-      name: 'Joey Joe Joe Sr.',
-      age: '46',
-      kids: [
-        {
-          name: 'Joey Joe Joe Jr.',
-          age: '23',
-          kids: [
-            {
-              name: 'Joey Joe Joe II',
-              age: '1',
-              kids: [],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: 'Homer',
-      age: '42',
-      kids: [
-        { name: 'Bart', age: '8', kids: [] },
-        { name: 'Lisa', age: '7', kids: [] },
-        { name: 'Maggie', age: '1', kids: [] },
-      ],
-    },
-    { name: 'Duff Man', age: '34', kids: [] },
+    { name: 'Bart', age: '10' },
+    { name: 'Homer', age: '42' },
+    { name: 'Duff Man', age: '34' },
   ],
 };
 
@@ -59,10 +35,11 @@ const Person = ({ path, totalRows, arrayPath, index }) => {
       <PathFormField
         path={[...path, 'name']}
         defaultValue=""
+        validations={[{ type: 'required', message: 'Must give a name.' }]}
         render={({ inputProps, meta, renders }) => {
           console.count(`RENDER COUNT ${inputProps.name}`);
           console.info({ meta, renders });
-          return <TextField label="Name" {...inputProps} />;
+          return <TextField label="Name" {...inputProps} error={!!meta.error} helperText={meta.error?.message} />;
         }}
       />
 
@@ -79,6 +56,7 @@ const Person = ({ path, totalRows, arrayPath, index }) => {
       <PathFormField
         path={[...path, 'someOption']}
         defaultValue={false}
+        validations={[{ type: 'min', value: 21, message: 'Must be at least 21 years old.' }]}
         render={({ inputProps: { onChange, value, ...inputProps } }) => {
           return (
             <FormControlLabel
@@ -114,7 +92,7 @@ const MyForm = () => {
   const { array } = usePathForm();
 
   return (
-    <>
+    <PathForm onSubmit={(values) => alert(JSON.stringify(values, null, 2))}>
       <PathFormArray
         path={['things']}
         defaultValue={[]}
@@ -131,10 +109,14 @@ const MyForm = () => {
           );
         }}
       />
+
       <Button size="small" variant="contained" onClick={() => array.append(['things'], {})}>
         Add
       </Button>
-    </>
+      <Button type="submit" size="small" variant="contained">
+        Submit
+      </Button>
+    </PathForm>
   );
 };
 

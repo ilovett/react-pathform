@@ -202,6 +202,7 @@ export const createStoreItemMeta = (): PathFormStoreMeta => {
     dirty: false,
     touched: false,
     error: null,
+    validations: null,
   };
 };
 
@@ -267,4 +268,60 @@ export const parseStoreItem = (item: PathFormStoreItem): any => {
 
 export const parseStore = (store: PathFormStore): object => {
   return mapValues(store, (i) => parseStoreItem(i));
+};
+
+export type PathFormStoreItemFlat = { dotpath: string; path: PathFormPath; storeItem: PathFormStoreItem };
+
+/**
+ * Creates a flat collection of every store item associated
+ * with a `path` and `dotpath` which can be iterated over.
+ *
+ * @param store
+ * @returns
+ */
+export const flattenStore = (store: PathFormStore) => {
+  const flattened: Array<PathFormStoreItemFlat> = [];
+
+  Object.keys(store).forEach((key) => {
+    const storeItem = store[key];
+    const basePath = [key];
+    flattenStoreItem(flattened, basePath, storeItem);
+  });
+
+  return flattened;
+};
+
+export const flattenStoreItem = (flattened: Array<PathFormStoreItemFlat>, basePath: PathFormPath, storeItem: PathFormStoreItem) => {
+  if (storeItem.type === 'array') {
+    flattenStoreItemArray(flattened, basePath, storeItem);
+  } else if (storeItem.type === 'object') {
+    flattenStoreItemObject(flattened, basePath, storeItem);
+  } else {
+    flattenStoreItemPrimitive(flattened, basePath, storeItem);
+  }
+};
+
+export const flattenStoreItemArray = (flattened: Array<PathFormStoreItemFlat>, basePath: PathFormPath, storeItem: PathFormStoreArray) => {
+  flattened.push({ dotpath: toDotPath(basePath), path: basePath, storeItem });
+
+  storeItem.value.forEach((childItem, index) => {
+    flattenStoreItem(flattened, [...basePath, index], childItem);
+  });
+};
+
+export const flattenStoreItemPrimitive = (
+  flattened: Array<PathFormStoreItemFlat>,
+  basePath: PathFormPath,
+  storeItem: PathFormStorePrimitive
+) => {
+  flattened.push({ dotpath: toDotPath(basePath), path: basePath, storeItem });
+};
+
+export const flattenStoreItemObject = (flattened: Array<PathFormStoreItemFlat>, basePath: PathFormPath, storeItem: PathFormStoreObject) => {
+  flattened.push({ dotpath: toDotPath(basePath), path: basePath, storeItem });
+
+  Object.keys(storeItem.value).forEach((key) => {
+    const childStoreItem = storeItem.value[key];
+    flattenStoreItem(flattened, [...basePath, key], childStoreItem);
+  });
 };

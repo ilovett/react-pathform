@@ -8,6 +8,7 @@ import {
   parseStoreItemArray,
   parseStoreItemPrimitive,
   fromDotPath,
+  flattenStore,
 } from './utils';
 
 let mockUuidCounter = 1;
@@ -25,6 +26,7 @@ const createMetaHelper = (uuid: string) => {
     dirty: false,
     touched: false,
     error: null,
+    validations: null,
   };
 };
 
@@ -230,6 +232,7 @@ describe('parseStoreItemObject', () => {
           dirty: false,
           touched: false,
           error: null,
+          validations: null,
         },
         value: {
           one: {
@@ -239,6 +242,7 @@ describe('parseStoreItemObject', () => {
               dirty: false,
               touched: false,
               error: null,
+              validations: null,
             },
             value: 1,
           },
@@ -249,6 +253,7 @@ describe('parseStoreItemObject', () => {
               dirty: false,
               touched: false,
               error: null,
+              validations: null,
             },
             value: 2,
           },
@@ -288,6 +293,7 @@ describe('parseStoreItemArray', () => {
           dirty: false,
           touched: false,
           error: null,
+          validations: null,
         },
         value: [
           {
@@ -297,6 +303,7 @@ describe('parseStoreItemArray', () => {
               dirty: false,
               touched: false,
               error: null,
+              validations: null,
             },
             value: 1,
           },
@@ -307,6 +314,7 @@ describe('parseStoreItemArray', () => {
               dirty: false,
               touched: false,
               error: null,
+              validations: null,
             },
             value: 2,
           },
@@ -317,11 +325,71 @@ describe('parseStoreItemArray', () => {
               dirty: false,
               touched: false,
               error: null,
+              validations: null,
             },
             value: 3,
           },
         ],
       })
     ).toMatchObject([1, 2, 3]);
+  });
+});
+
+describe('flattenStore', () => {
+  it('works as expected', () => {
+    expect(
+      flattenStore({
+        items: {
+          type: 'array',
+          meta: {
+            uuid: 'uuid-1',
+            dirty: false,
+            touched: false,
+            error: null,
+            validations: null,
+          },
+          value: [
+            {
+              type: 'primitive',
+              meta: {
+                uuid: 'uuid-2',
+                dirty: false,
+                touched: false,
+                error: null,
+                validations: null,
+              },
+              value: 1,
+            },
+            {
+              type: 'primitive',
+              meta: {
+                uuid: 'uuid-3',
+                dirty: false,
+                touched: false,
+                error: null,
+                validations: null,
+              },
+              value: 2,
+            },
+            {
+              type: 'primitive',
+              meta: {
+                uuid: 'uuid-4',
+                dirty: false,
+                touched: false,
+                error: null,
+                validations: null,
+              },
+              value: 3,
+            },
+          ],
+        },
+      })
+    ).toMatchObject([
+      { dotpath: 'items', path: ['items'], storeItem: { meta: { uuid: 'uuid-1' } } },
+      { dotpath: 'items[0]', path: ['items', 0], storeItem: { meta: { uuid: 'uuid-2' }, value: 1 } },
+      { dotpath: 'items[1]', path: ['items', 1], storeItem: { meta: { uuid: 'uuid-3' }, value: 2 } },
+      { dotpath: 'items[2]', path: ['items', 2], storeItem: { meta: { uuid: 'uuid-4' }, value: 3 } },
+    ]);
   });
 });

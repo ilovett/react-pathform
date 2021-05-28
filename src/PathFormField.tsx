@@ -1,5 +1,5 @@
 import React from 'react';
-import { PathFormPath, PathFormStoreMeta, usePathForm, usePathFormDotPath, usePathFormValue } from '.';
+import { PathFormPath, PathFormStoreMeta, PathFormValidation, usePathForm, usePathFormDotPath, usePathFormValue } from '.';
 
 export interface PathFormInputProps {
   name: string;
@@ -19,21 +19,22 @@ interface PathFormFieldProps {
   defaultValue: any; // TODO generics?
   render: (props: PathFormFieldRenderProps) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
   renderEmpty?: (props: PathFormFieldRenderProps) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
+  validations?: Array<PathFormValidation>;
 }
 
-export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defaultValue }) => {
+export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defaultValue, validations }) => {
   const name = usePathFormDotPath(path);
   const [value, meta, renders] = usePathFormValue(path, defaultValue); // TODO defaultValue needed?
-  const { setValue, setTouched, setDirty, clearError } = usePathForm();
+  const { setValue, setMeta, clearError } = usePathForm();
 
   const onChange = React.useCallback(
     (event: any) => {
       // TODO handle all sorts of values
       const value = event?.target?.value ?? event;
       setValue(path, value);
-      setDirty(path, true);
+      setMeta(path, { dirty: true });
     },
-    [path, setValue, setDirty]
+    [path, setValue, setMeta]
   );
 
   // TODO onBlur, ref
@@ -48,11 +49,26 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
       }
 
       if (meta.touched !== true) {
-        setTouched(path, true);
+        setMeta(path, { touched: true });
       }
     },
-    [path, clearError, setTouched, meta]
+    [path, clearError, setMeta, meta]
   );
+
+  // TODO reusable hook for usePathFormValidation -> useEffect [validations]
+  React.useEffect(() => {
+    // TODO handle multiple fields for same path
+    if (validations) {
+      setMeta(path, { validations });
+    }
+
+    return () => {
+      if (validations) {
+        setMeta(path, { validations: null });
+      }
+    };
+    // eslint-disable-next-line
+  }, []);
 
   return render({
     inputProps: {

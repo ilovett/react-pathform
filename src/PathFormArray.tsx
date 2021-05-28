@@ -1,6 +1,6 @@
 import React from 'react';
 import { PathFormArrayUtils, PathFormPath, PathFormStoreMeta, toStorePath, usePathForm, usePathFormValue } from '.';
-import { createStoreItem, createStoreItemMeta, get, set } from './utils';
+import { createStoreItem, get, set } from './utils';
 
 export type PathFormArrayItemProps = {
   arrayPath: PathFormPath;
