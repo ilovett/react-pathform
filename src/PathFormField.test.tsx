@@ -38,7 +38,7 @@ describe('PathFormField', () => {
       <pre
         data-testid="meta"
       >
-        {"uuid":"uuid-4","dirty":false,"touched":false,"error":null}
+        {"uuid":"uuid-4","dirty":false,"touched":false,"error":null,"validations":null}
       </pre>
     `);
     expect(getByLabelText(container, 'Name')).toHaveDisplayValue('Joey Joe Joe Jr. Shabadoo');

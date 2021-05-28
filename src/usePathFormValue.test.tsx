@@ -25,6 +25,7 @@ test('should return the expected value and meta', () => {
       "error": null,
       "touched": false,
       "uuid": "uuid-4",
+      "validations": null,
     }
   `);
 });

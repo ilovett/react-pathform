@@ -115,6 +115,31 @@ The value use on the initial render, if the store item does not already exist.
 
 The callback to render the field.
 
+#### PathFormField `validations: PathFormValidation[]`
+
+Register [validations](#PathFormValidation) for this field.
+
+```tsx
+<PathFormField
+  path={['person', 0, 'name']}
+  defaultValue=""
+  validations={[
+    { type: 'required', message: 'This person must have a name.' },
+    { type: 'maxLength', value: 16, message: 'This must be less than 16 characters.' },
+  ]}
+  render={({ inputProps, meta }) => {
+    return (
+      <TextField
+        label="Name"
+        error={!!meta.error}
+        helperText={meta.error?.message}
+        {...inputProps}
+      />
+    );
+  }}
+/>
+```
+
 <br/><br/>
 
 ### PathFormArray
@@ -259,6 +284,15 @@ type PathFormInputProps = {
 }
 ```
 
+### PathFormValidation
+
+```ts
+type PathFormValidation =
+  | { type: 'required'; message: string }
+  | { type: 'minLength' | 'maxLength' | 'min' | 'max'; value: number; message: string }
+  | { type: 'regex'; value: string; flags?: string; message: string };
+```
+
 ### PathFormError
 
 ```ts
@@ -328,7 +362,7 @@ Primitive values cannot have any children.
 | Library | onSubmit | &#9745; |
 | Library | reset | &#9744; |
 | Library | touched & validation | &#9744; |
-| Library | Built in validation | &#9744; |
+| Library | Built in validation | &#9745; |
 | Examples | Codesandbox | &#9745; |
 | Examples | Example App | &#9744; |
 | Bundle Size | Optimize UUID | &#9744; |

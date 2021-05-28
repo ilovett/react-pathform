@@ -12,6 +12,7 @@ import {
   eventEmitter,
   parseStore,
 } from '.';
+import { flattenStore, PathFormStoreItemFlat } from './utils';
 
 export type PathFormValuePrimitive = string | number | boolean | null;
 
@@ -24,16 +25,25 @@ export type PathFormPath = Array<string | number>; // | string;
 
 export type PathFormError = {
   type: string;
-  message: string;
-  value: any;
+  message: React.ReactNode;
+  value?: any;
 };
 
 export type PathFormStoreMeta = {
   uuid: string;
   dirty: boolean;
   touched: boolean;
-  error: null | PathFormError; // TODO
+  error: null | PathFormError;
+  validations: null | Array<PathFormValidation>;
 };
+
+// TODO omit error?
+export type PathFormStoreSetMeta = Partial<Omit<PathFormStoreMeta, 'uuid'>>;
+
+export type PathFormValidation =
+  | { type: 'required'; message: string }
+  | { type: 'minLength' | 'maxLength' | 'min' | 'max'; value: number; message: string }
+  | { type: 'regex'; value: string; flags?: string; message: string };
 
 export type PathFormValueType = 'primitive' | 'object' | 'array';
 
@@ -83,10 +93,12 @@ type PathFormStateContext = {
   array: PathFormArrayUtils;
   getValues: () => any;
   setValue: (path: PathFormPath, value: any) => any;
-  setDirty: (path: PathFormPath, dirty: boolean) => any;
-  setTouched: (path: PathFormPath, touched: boolean) => any;
+  setMeta: (path: PathFormPath, meta: PathFormStoreSetMeta) => any;
   addError: (path: PathFormPath, error: PathFormError) => any;
   clearError: (path: PathFormPath) => any;
+  forEachStoreItem: (callback: (item: PathFormStoreItemFlat) => any) => any;
+  validate: (path: PathFormPath) => any;
+  validateStore: () => any; // TODO throws?
 };
 
 export type PathFormArrayUtils = {
@@ -117,6 +129,91 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
 
   const getValues = () => {
     return parseStore(state.current.store);
+  };
+
+  const validateStore = () => {
+    const flattenedStoreItems = flattenStore(state.current.store);
+
+    // validate at every path
+    flattenedStoreItems.forEach(({ path }) => {
+      validate(path);
+    });
+
+    // look for at least one error
+    const errors = flattenedStoreItems.filter(({ storeItem }) => {
+      return !!storeItem.meta.error;
+    });
+
+    // throw to stop submission
+    if (errors.length) {
+      throw errors;
+    }
+  };
+
+  const forEachStoreItem = (callback: (item: PathFormStoreItemFlat) => any) => {
+    const flattenedStoreItems = flattenStore(state.current.store);
+    flattenedStoreItems.forEach(callback);
+  };
+
+  const validate = (path: PathFormPath) => {
+    const dotpath = toDotPath(path); // cant use hooks inside
+    const storePath = toStorePath(path);
+    const storeItem = get(state.current.store, storePath) as PathFormStoreItem;
+
+    // validate that the target store item exists
+    if (storeItem === undefined) {
+      throw new Error(`The target path "${dotpath}" does not exist.`);
+    }
+
+    if (storeItem.meta.validations) {
+      storeItem.meta.validations.forEach((validation) => {
+        if (storeItem.type === 'primitive') {
+          if (validation.type === 'required') {
+            if (storeItem.value === null || (typeof storeItem.value === 'string' && storeItem.value === '')) {
+              addError(path, validation);
+            }
+          } else if (validation.type === 'min') {
+            if (Number(storeItem.value) < validation.value) {
+              addError(path, validation);
+            }
+          } else if (validation.type === 'max') {
+            if (Number(storeItem.value) > validation.value) {
+              addError(path, validation);
+            }
+          } else if (validation.type === 'minLength') {
+            if (typeof storeItem.value === 'string' && storeItem.value.length < validation.value) {
+              addError(path, validation);
+            }
+          } else if (validation.type === 'maxLength') {
+            if (typeof storeItem.value === 'string' && storeItem.value.length > validation.value) {
+              addError(path, validation);
+            }
+          } else if (validation.type === 'regex') {
+            try {
+              const regex = new RegExp(validation.value, validation.flags);
+
+              if (typeof storeItem.value === 'string' && !regex.test(storeItem.value)) {
+                addError(path, validation);
+              }
+            } catch (err) {
+              // could not compile regex
+            }
+          }
+        } else if (storeItem.type === 'array') {
+          if (validation.type === 'minLength') {
+            if (storeItem.value.length < validation.value) {
+              addError(path, validation);
+            }
+          } else if (validation.type === 'maxLength') {
+            if (storeItem.value.length > validation.value) {
+              addError(path, validation);
+            }
+          }
+        }
+      });
+    } else {
+      // clearError(path);
+    }
   };
 
   const setValue = (path: PathFormPath, value: any) => {
@@ -152,7 +249,7 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
     }
   };
 
-  const setDirty = (path: PathFormPath, dirty: boolean) => {
+  const setMeta = (path: PathFormPath, meta: PathFormStoreSetMeta) => {
     const dotpath = toDotPath(path); // cant use hooks inside
     const storePath = toStorePath(path);
     const storeItem = get(state.current.store, storePath);
@@ -162,25 +259,9 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
       throw new Error(`The target path "${dotpath}" does not exist.`);
     }
 
-    // mutate the target store item
-    set(state.current.store, [...storePath, 'meta', 'dirty'], dirty);
-
-    // notify subscribers
-    watchers.current.emit(dotpath, storeItem);
-  };
-
-  const setTouched = (path: PathFormPath, touched: boolean) => {
-    const dotpath = toDotPath(path); // cant use hooks inside
-    const storePath = toStorePath(path);
-    const storeItem = get(state.current.store, storePath);
-
-    // validate that the target store item exists
-    if (storeItem === undefined) {
-      throw new Error(`The target path "${dotpath}" does not exist.`);
-    }
-
-    // mutate the target store item
-    set(state.current.store, [...storePath, 'meta', 'touched'], touched);
+    // mutate the target store item meta with updated values
+    const existing = get(state.current.store, [...storePath, 'meta']) as PathFormStoreMeta;
+    Object.assign(existing, meta);
 
     // notify subscribers
     watchers.current.emit(dotpath, storeItem);
@@ -269,7 +350,21 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
   };
 
   return (
-    <PathFormStateContext.Provider value={{ state, watchers, array, getValues, setValue, addError, clearError, setTouched, setDirty }}>
+    <PathFormStateContext.Provider
+      value={{
+        state,
+        watchers,
+        array,
+        getValues,
+        setValue,
+        addError,
+        clearError,
+        setMeta,
+        forEachStoreItem,
+        validate,
+        validateStore,
+      }}
+    >
       {children}
     </PathFormStateContext.Provider>
   );
