@@ -19,12 +19,47 @@ import {
 
 // tree shakeable wrappers
 // TODO eventually completely remove these 3rd party library dependencies
-export const get = (obj: object, path: PathFormPath, defaultValue?: any) => {
-  return lodashGet(obj, path, defaultValue);
+export const get = (store: PathFormStore, storePath: PathFormPath, defaultValue?: any) => {
+  return lodashGet(store, storePath, defaultValue);
 };
 
-export const set = (obj: object, path: PathFormPath, value: any) => {
-  return lodashSet(obj, path, value);
+type PathFormSetStoreOptions = {
+  validateParentPath?: boolean;
+};
+
+// TODO eventually this should recursively start from the root and update recursively
+export const set = (store: PathFormStore, storePath: PathFormPath, value: any, options?: PathFormSetStoreOptions) => {
+  const result = lodashSet(store, storePath, value);
+
+  // ensure types and meta are set on parent paths
+  // there is a bug here when setting on path where the last item is not 'value' -- IE: when set(.., [..., 'meta'])
+  if (options?.validateParentPath === true) {
+    validateNewStorePath(store, storePath);
+  }
+
+  return result;
+};
+
+/**
+ * Recursively traverses up the path to root to ensure the newly created
+ * path types are set at each level.
+ *
+ * @param store
+ * @param storePath
+ */
+export const validateNewStorePath = (store: PathFormStore, storePath: PathFormPath) => {
+  const storeItem = get(store, storePath);
+
+  // assign the type if missing and create meta
+  if (!storeItem.type) {
+    storeItem.type = typeOf(storeItem.value);
+    storeItem.meta = createStoreItemMeta();
+  }
+
+  // always go up the path to the root, stop at the root
+  if (storePath.length > 2) {
+    validateNewStorePath(store, storePath.slice(0, storePath.length - 2));
+  }
 };
 
 export const mapValues = <T>(obj: object, callback: ObjectIterator<object, T>): any => {
@@ -261,8 +296,11 @@ export const parseStoreItem = (item: PathFormStoreItem): any => {
     return parseStoreItemArray(item);
   } else if (item.type === 'object') {
     return parseStoreItemObject(item);
-  } else {
+  } else if (item.type === 'primitive') {
     return parseStoreItemPrimitive(item);
+  } else {
+    console.error('Unable to parse store item', item);
+    throw new Error('Unable to parse store item.');
   }
 };
 

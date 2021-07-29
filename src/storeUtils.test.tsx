@@ -9,7 +9,9 @@ import {
   parseStoreItemPrimitive,
   fromDotPath,
   flattenStore,
-} from './utils';
+  set,
+  createStoreItem,
+} from './storeUtils';
 
 let mockUuidCounter = 1;
 let mockUuid = jest.fn().mockImplementation(() => {
@@ -32,6 +34,92 @@ const createMetaHelper = (uuid: string) => {
 
 beforeEach(() => {
   mockUuidCounter = 1;
+});
+
+describe('set', () => {
+  it('doesnt validate parent paths unless explicitly defined', () => {
+    const fakeStore = {};
+    const storeItem = createStoreItem('Hello World');
+
+    set(fakeStore, ['rootItem', 'value', 'parentObject', 'value', 'primitiveLeaf', 'value'], storeItem);
+
+    // note that `type` and `meta` are missing on parent items
+    expect(fakeStore).toMatchInlineSnapshot(`
+      Object {
+        "rootItem": Object {
+          "value": Object {
+            "parentObject": Object {
+              "value": Object {
+                "primitiveLeaf": Object {
+                  "value": Object {
+                    "meta": Object {
+                      "dirty": false,
+                      "error": null,
+                      "touched": false,
+                      "uuid": "uuid-1",
+                      "validations": null,
+                    },
+                    "type": "primitive",
+                    "value": "Hello World",
+                  },
+                },
+              },
+            },
+          },
+        },
+      }
+    `);
+  });
+
+  it('validates parent paths when setting deep leaf nodes', () => {
+    const fakeStore = {};
+    const storeItem = createStoreItem('Hello World');
+
+    set(fakeStore, ['rootItem', 'value', 'parentObject', 'value', 'primitiveLeaf', 'value'], storeItem, { validateParentPath: true });
+
+    // expect that rootItem, parentObject have type/meta assigned
+    expect(fakeStore).toMatchInlineSnapshot(`
+      Object {
+        "rootItem": Object {
+          "value": Object {
+            "meta": Object {
+              "dirty": false,
+              "error": null,
+              "touched": false,
+              "uuid": "uuid-3",
+              "validations": null,
+            },
+            "parentObject": Object {
+              "value": Object {
+                "meta": Object {
+                  "dirty": false,
+                  "error": null,
+                  "touched": false,
+                  "uuid": "uuid-2",
+                  "validations": null,
+                },
+                "primitiveLeaf": Object {
+                  "value": Object {
+                    "meta": Object {
+                      "dirty": false,
+                      "error": null,
+                      "touched": false,
+                      "uuid": "uuid-1",
+                      "validations": null,
+                    },
+                    "type": "primitive",
+                    "value": "Hello World",
+                  },
+                },
+                "type": "primitive",
+              },
+            },
+            "type": "primitive",
+          },
+        },
+      }
+    `);
+  });
 });
 
 describe('toStorePath', () => {

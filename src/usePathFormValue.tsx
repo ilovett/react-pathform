@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { PathFormPath, PathFormStoreItem, PathFormStoreMeta, usePathForm } from './usePathForm';
 import { usePathFormDotPath } from './usePathFormDotPath';
 import { usePathFormStorePath } from './usePathFormStorePath';
-import { createStoreItem, get, parseStoreItem, set } from './utils';
+import { createStoreItem, get, parseStoreItem, set } from './storeUtils';
 
 export const usePathFormValue = (path: PathFormPath, defaultValue?: any) => {
   // internal state is how we force trigger re-render, by increase renders
@@ -18,7 +18,7 @@ export const usePathFormValue = (path: PathFormPath, defaultValue?: any) => {
   useEffect(() => {
     // if the store item is not there, create it
     if (storeItem?.value === undefined) {
-      set(state.current.store, storePath, defaultStoreItemValue);
+      set(state.current.store, storePath, defaultStoreItemValue, { validateParentPath: true });
     }
     // thank you for looking out for us eslint
     // but we only want this to happen on the initial mount

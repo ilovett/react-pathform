@@ -12,7 +12,7 @@ import {
   eventEmitter,
   parseStore,
 } from '.';
-import { flattenStore, PathFormStoreItemFlat } from './utils';
+import { flattenStore, PathFormStoreItemFlat } from './storeUtils';
 
 export type PathFormValuePrimitive = string | number | boolean | null;
 
