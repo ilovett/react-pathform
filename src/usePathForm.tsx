@@ -18,6 +18,7 @@ export type PathFormValuePrimitive = string | number | boolean | null;
 
 export type PathFormState = {
   store: PathFormStore;
+  errors: PathFormStoreItemFlat[];
   defaults: object;
 };
 
@@ -27,6 +28,10 @@ export type PathFormError = {
   type: string;
   message: React.ReactNode;
   value?: any;
+};
+
+export type PathFormErrorOptions = {
+  publish?: boolean;
 };
 
 export type PathFormStoreMeta = {
@@ -96,6 +101,7 @@ type PathFormStateContext = {
   setMeta: (path: PathFormPath, meta: PathFormStoreSetMeta) => any;
   addError: (path: PathFormPath, error: PathFormError) => any;
   clearError: (path: PathFormPath) => any;
+  clearErrors: (paths?: PathFormPath[]) => any;
   forEachStoreItem: (callback: (item: PathFormStoreItemFlat) => any) => any;
   validate: (path: PathFormPath) => any;
   validateStore: () => any; // TODO throws?
@@ -108,6 +114,7 @@ export type PathFormArrayUtils = {
   move: (path: PathFormPath, fromIndex: number, toIndex: number) => any;
 };
 
+// eslint-disable-next-line
 const PathFormStateContext = React.createContext<PathFormStateContextInitialized | PathFormStateContext>({
   state: null,
   watchers: null,
@@ -121,8 +128,9 @@ interface PathFormProviderProps {
 }
 
 export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, initialRenderValues }) => {
-  const state = React.useRef({
+  const state = React.useRef<PathFormState>({
     store: createStore(initialRenderValues),
+    errors: [],
     defaults: initialRenderValues,
   });
   const watchers = React.useRef(eventEmitter());
@@ -267,7 +275,7 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
     watchers.current.emit(dotpath, storeItem);
   };
 
-  const addError = (path: PathFormPath, error: PathFormError) => {
+  const addError = (path: PathFormPath, error: PathFormError, options?: PathFormErrorOptions) => {
     const dotpath = toDotPath(path);
     const storePath = toStorePath(path);
     const storeItem = get(state.current.store, storePath); // TODO default value based on value here?
@@ -280,11 +288,26 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
     // mutate the target store item error
     set(state.current.store, [...storePath, 'meta', 'error'], error);
 
-    // notify subscribers
+    // add to errors if not already added
+    if (!state.current.errors.find((flatStoreItem) => flatStoreItem.dotpath === dotpath)) {
+      state.current.errors.push({ dotpath, path, storeItem });
+
+      // TODO if (options.publish !== false)
+      // notify the errors subscribers
+      if (options?.publish !== false) {
+        watchers.current.emit('errors', state.current.errors);
+      }
+    }
+
+    // notify each the dotpath subscribers
     watchers.current.emit(dotpath, storeItem);
   };
 
-  const clearError = (path: PathFormPath) => {
+  /**
+   * Remove the error at a given path.If a specific error is given,
+   * then only that error will be removed.
+   */
+  function clearError(path: PathFormPath, error?: PathFormError, options?: PathFormErrorOptions) {
     const dotpath = toDotPath(path);
     const storePath = toStorePath(path);
     const storeItem = get(state.current.store, storePath);
@@ -297,8 +320,29 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
     // mutate the target store item
     set(state.current.store, [...storePath, 'meta', 'error'], null);
 
+    // remove from the errors array if found
+    const errorIndex = state.current.errors.findIndex((flatStoreItem) => flatStoreItem.dotpath === dotpath);
+    if (errorIndex > -1) {
+      arrayRemove(state.current.errors, errorIndex);
+
+      // TODO if (options.publish !== false)
+      // notify the errors subscribers
+      if (options?.publish !== false) {
+        watchers.current.emit('errors', state.current.errors);
+      }
+    }
+
     // notify subscribers
     watchers.current.emit(dotpath, storeItem);
+  }
+
+  const clearErrors = () => {
+    const flattenedStoreItems = flattenStore(state.current.store);
+
+    // TODO filter all paths if given
+
+    // validate at every path
+    flattenedStoreItems.forEach(({ path }) => clearError(path));
   };
 
   // helper for mutating store arrays to keep the array utils DRY
@@ -359,6 +403,7 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
         setValue,
         addError,
         clearError,
+        clearErrors,
         setMeta,
         forEachStoreItem,
         validate,

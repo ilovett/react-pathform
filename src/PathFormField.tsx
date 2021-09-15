@@ -70,7 +70,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
       // since the whole store item is getting removed...
       // TODO this should not throw errors
       if (validations) {
-        debugger;
+        // debugger;
         // setMeta(path, { validations: null });
       }
     };

@@ -18,9 +18,9 @@
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
-    "test": "DEBUG_PRINT_LIMIT=30000 tsdx test --passWithNoTests --runInBand",
-    "test:watch": "DEBUG_PRINT_LIMIT=30000 tsdx test --passWithNoTests --watch",
+    "test": "DEBUG_PRINT_LIMIT=30000 tsdx test --passWithNoTests --watch",
     "test:debug": "DEBUG_PRINT_LIMIT=30000 node --inspect-brk=127.0.0.1:9500 ./node_modules/tsdx/dist/index.js test --passWithNoTests --watch --runInBand",
+    "test:ci": "tsdx test --passWithNoTests --ci --coverage",
     "lint": "tsdx lint",
     "prepare": "tsdx build",
     "size": "size-limit",
@@ -45,15 +45,19 @@
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
     "@types/uuid": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.30.0",
+    "@typescript-eslint/parser": "^4.30.0",
+    "eslint-config-react-app": "^6.0.0",
     "husky": "^5.0.9",
     "jest": "^27.0.6",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-test-renderer": "^16.14.0",
     "size-limit": "^4.9.2",
+    "ts-jest": "^27.0.5",
     "tsdx": "^0.14.1",
     "tslib": "^2.1.0",
-    "typescript": "^4.1.5"
+    "typescript": "^4.4.2"
   },
   "jest": {
     "setupFilesAfterEnv": [
@@ -75,11 +79,18 @@
   "size-limit": [
     {
       "path": "dist/react-pathform.cjs.production.min.js",
-      "limit": "10 KB"
+      "limit": "15 KB"
     },
     {
       "path": "dist/react-pathform.esm.js",
-      "limit": "10 KB"
+      "limit": "15 KB"
     }
-  ]
+  ],
+  "resolutions": {
+    "**/@typescript-eslint/eslint-plugin": "^4.30.0",
+    "**/@typescript-eslint/parser": "^4.30.0",
+    "**/jest": "^27.0.6",
+    "**/ts-jest": "^27.0.5",
+    "**/typescript": "^4.4.2"
+  }
 }
