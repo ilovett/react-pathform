@@ -7,7 +7,7 @@ interface PathFormProps extends HTMLAttributes<HTMLFormElement> {
 }
 
 export const PathForm: React.FC<PathFormProps> = ({ onSubmit, onValidate, ...other }) => {
-  const { getValues, addError, validateStore } = usePathForm();
+  const { getValues, addError, validateStore, clearErrors } = usePathForm();
 
   return (
     // TODO eventually, react native support
@@ -23,6 +23,9 @@ export const PathForm: React.FC<PathFormProps> = ({ onSubmit, onValidate, ...oth
           try {
             // get the current store values
             const values = getValues();
+
+            // clear all the errors
+            clearErrors();
 
             // use given onValidate if provided
             if (onValidate) {

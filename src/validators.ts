@@ -5,7 +5,7 @@ export const validateYupSchema = (schema: any) => async (values: any, addError: 
     await schema?.validate(values, { abortEarly: false });
   } catch (err) {
     // inner is available when `abortEarly: false`
-    err?.inner?.forEach?.((validationError: any) => {
+    (err as any)?.inner?.forEach?.((validationError: any) => {
       const path = fromDotPath(validationError.path);
       const { type, message, value } = validationError;
       try {
