@@ -1,14 +1,18 @@
 # react-pathform
 
 Pathform was built to scratch an itch for recursive, nested, dynamic forms.
-Using paths as an array, we can spread dynamic paths around like butter.
+Using paths as an array, we can spread nested fields around like butter.
 
-We can derive a lot from the [path as array](#PathFormPath)...[ Why is this useful?](#But-Y-Tho)
+We can derive a lot from the [path](#PathFormPath)... [Why is this useful?](#But-Y-Tho)
 
 ## Quick Start
 
 ```bash
 npm install --save react-pathform
+
+# or
+
+yarn add react-pathform
 ```
 
 ```jsx
@@ -350,21 +354,10 @@ Primitive values cannot have any children.
 
 <br/><br/>
 
-## Feature Checklist
+## TODO
 
-| Category | Criteria | Complete |
-|----------|---------|----------|
-| README | Feature Checklist | &#9745; |
-| README | Quick Start | &#9745; |
-| README | Simple CodeSandbox | &#9745; |
-| README | API | &#9745; |
-| Library | onValidate | &#9745; |
-| Library | onSubmit | &#9745; |
-| Library | reset | &#9744; |
-| Library | touched & validation | &#9744; |
-| Library | Built in validation | &#9745; |
-| Examples | Codesandbox | &#9745; |
-| Examples | Example App | &#9744; |
-| Bundle Size | Optimize UUID | &#9744; |
-| Bundle Size | Optimize Lodash | &#9744; |
-| README | Contributing | &#9744; |
+- [ ] Reset to `defaultValues`
+- [ ] Touched / Dirty
+- [ ] Drop `uuid` dependency
+- [ ] Drop `lodash` dependency
+- [ ] CONTRIBUTING.md
