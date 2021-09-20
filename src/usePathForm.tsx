@@ -110,9 +110,16 @@ type PathFormStateContext = {
 export type PathFormArrayUtils = {
   append: (path: PathFormPath, item: any) => any;
   prepend: (path: PathFormPath, item: any) => any;
-  remove: (path: PathFormPath, item: any) => any;
+  remove: (path: PathFormPath, index: number) => any;
   move: (path: PathFormPath, fromIndex: number, toIndex: number) => any;
 };
+
+export interface PathFormPublishOptions {
+  path?: PathFormPath;
+  // paths?: Array<PathFormPath?; // TODO publish to multiple paths
+  // up?: number; // TODO publish parent / up N levels
+  // down?: number; // TODO publish child / down N levels
+}
 
 // eslint-disable-next-line
 const PathFormStateContext = React.createContext<PathFormStateContextInitialized | PathFormStateContext>({

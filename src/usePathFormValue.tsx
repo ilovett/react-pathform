@@ -4,7 +4,7 @@ import { usePathFormDotPath } from './usePathFormDotPath';
 import { usePathFormStorePath } from './usePathFormStorePath';
 import { createStoreItem, get, parseStoreItem, set } from './storeUtils';
 
-export const usePathFormValue = (path: PathFormPath, defaultValue?: any) => {
+export function usePathFormValue<T = any>(path: PathFormPath, defaultValue?: T) {
   // internal state is how we force trigger re-render, by increase renders
   const [renders, setRenders] = useState(0);
   const { state, watchers } = usePathForm();
@@ -16,6 +16,11 @@ export const usePathFormValue = (path: PathFormPath, defaultValue?: any) => {
   // only on initial mount, if value does not exist, set the defaultValue
   // this happens asynchronously but the returned value on first render will be synced immediately
   useEffect(() => {
+    // refetch `storeItem` in this `useEffect` scope as the outer closure `storeItem`
+    // may be out of date, because it may have been set by another `defaultValue`
+    // between multiple first render hook and `useEffect` on the same path
+    const storeItem = get(state.current.store, storePath) as PathFormStoreItem;
+
     // if the store item is not there, create it
     if (storeItem?.value === undefined) {
       set(state.current.store, storePath, defaultStoreItemValue, { validateParentPath: true });
@@ -37,11 +42,12 @@ export const usePathFormValue = (path: PathFormPath, defaultValue?: any) => {
 
   // TODO handle no storeItem set
 
+  // fallback to defaultValue meta and storeItem on first render -- `useEffect` triggers after first render
   const meta = storeItem?.meta || defaultStoreItemValue.meta;
   const value = !!storeItem?.type ? parseStoreItem(storeItem) : defaultValue;
 
   // renders is increased, but `value` and `meta` are pulled at the time of render
   return useMemo(() => {
-    return [value, meta, renders] as [any, PathFormStoreMeta, number];
+    return [value, meta, renders] as [T, PathFormStoreMeta, number];
   }, [value, meta, renders]);
-};
+}
