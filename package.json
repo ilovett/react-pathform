@@ -18,7 +18,7 @@
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
-    "test": "DEBUG_PRINT_LIMIT=30000 tsdx test --passWithNoTests --watch",
+    "test": "DEBUG_PRINT_LIMIT=30000 tsdx test --passWithNoTests --runInBand",
     "test:debug": "DEBUG_PRINT_LIMIT=30000 node --inspect-brk=127.0.0.1:9500 ./node_modules/tsdx/dist/index.js test --passWithNoTests --watch --runInBand",
     "test:ci": "tsdx test --passWithNoTests --ci --coverage",
     "lint": "tsdx lint",
