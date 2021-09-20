@@ -1,5 +1,14 @@
 import React from 'react';
-import { PathFormPath, PathFormStoreMeta, PathFormValidation, usePathForm, usePathFormDotPath, usePathFormValue } from '.';
+import {
+  PathFormPath,
+  PathFormPublishOptions,
+  PathFormStoreMeta,
+  PathFormValidation,
+  toDotPath,
+  usePathForm,
+  usePathFormDotPath,
+  usePathFormValue,
+} from '.';
 
 export interface PathFormInputProps {
   name: string;
@@ -20,12 +29,13 @@ interface PathFormFieldProps {
   render: (props: PathFormFieldRenderProps) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
   renderEmpty?: (props: PathFormFieldRenderProps) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???
   validations?: Array<PathFormValidation>;
+  publish?: PathFormPublishOptions;
 }
 
-export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defaultValue, validations }) => {
+export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defaultValue, validations, publish }) => {
   const name = usePathFormDotPath(path);
   const [value, meta, renders] = usePathFormValue(path, defaultValue); // TODO defaultValue needed?
-  const { setValue, setMeta, clearError } = usePathForm();
+  const { setValue, setMeta, clearError, watchers } = usePathForm();
 
   const onChange = React.useCallback(
     (event: any) => {
@@ -33,7 +43,15 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
       const value = event?.target?.value ?? event;
       setValue(path, value);
       setMeta(path, { dirty: true });
+
+      if (publish?.path) {
+        // TODO this value is wrong and should just be publish(publish?.path) -- if no value given, get the store value as-is
+        watchers.current.emit(toDotPath(publish?.path), value);
+      }
     },
+    // ignore `watchers`
+    // ignore `publish` TODO eventually this should be serialized
+    // eslint-disable-next-line
     [path, setValue, setMeta]
   );
 

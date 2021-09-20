@@ -334,13 +334,18 @@ These libraries use the native input property `name` as a dot notation string to
 const name = "deeply.nested.items[0].children[0].name";
 ```
 
-Whereas this library *derives* the `name` *from* a `path`.  The difference is,
+Whereas this library *derives* the input `name` *from* the `path`.  The difference is,
 you can easily spread arrays, not strings.
 
 ```ts
-const parentPath = ["deeply", "nested", "items"]; // name = "deeply.nested.items"
-const childPath = [...parentPath, itemIndex, "children"]; // name = "deeply.nested.items[0].children"
-const deepPath = [...childPath, childIndex, "name"];  // name = "deeply.nested.items[0].children[0].name"
+// name="deeply.nested.items"
+const parentPath = ["deeply", "nested", "items"];
+
+// name="deeply.nested.items[0].children"
+const childPath = [...parentPath, itemIndex, "children"];
+
+// name="deeply.nested.items[0].children[0].name"
+const deepPath = [...childPath, childIndex, "name"];
 ```
 
 This makes nested / recursive form components much cleaner.
@@ -357,7 +362,7 @@ Primitive values cannot have any children.
 ## TODO
 
 - [ ] Reset to `defaultValues`
-- [ ] Touched / Dirty
+- [ ] Meta `dirty` / `touched`
 - [ ] Drop `uuid` dependency
 - [ ] Drop `lodash` dependency
 - [ ] CONTRIBUTING.md
