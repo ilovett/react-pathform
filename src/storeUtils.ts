@@ -308,7 +308,11 @@ export const parseStore = (store: PathFormStore): object => {
   return mapValues(store, (i) => parseStoreItem(i));
 };
 
-export type PathFormStoreItemFlat = { dotpath: string; path: PathFormPath; storeItem: PathFormStoreItem };
+export type PathFormStoreItemFlat = {
+  dotpath: string;
+  path: PathFormPath;
+  storeItem: PathFormStoreItem;
+};
 
 /**
  * Creates a flat collection of every store item associated

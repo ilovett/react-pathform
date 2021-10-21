@@ -1,7 +1,7 @@
 import React, { HTMLAttributes } from 'react';
 import { usePathForm } from './usePathForm';
 
-interface PathFormProps extends HTMLAttributes<HTMLFormElement> {
+export interface PathFormProps extends HTMLAttributes<HTMLFormElement> {
   onValidate?: (values: any, addError?: any) => any;
   onSubmit?: (values: any) => any;
 }

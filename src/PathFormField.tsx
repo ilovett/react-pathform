@@ -23,7 +23,7 @@ export interface PathFormFieldRenderProps {
   renders: number;
 }
 
-interface PathFormFieldProps {
+export interface PathFormFieldProps {
   path: PathFormPath;
   defaultValue: any; // TODO generics?
   render: (props: PathFormFieldRenderProps) => React.ReactElement; // TODO React.ReactNode vs ReactElement ???

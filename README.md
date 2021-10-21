@@ -72,6 +72,7 @@ Check out the [Example App](./example/README.md)
   - [PathForm](#PathForm)
   - [PathFormField](#PathFormField)
   - [PathFormArray](#PathFormArray)
+  - [PathFormErrors](#PathFormErrors)
 - Hooks
   - [usePathForm](#usePathForm)
   - [usePathFormValue](#usePathFormValue)
@@ -163,6 +164,28 @@ Use the `meta.uuid` on your root item `key`.<br/>
     </div>
   )}
   renderEmpty={() => <>No Items!</>}
+/>
+```
+
+### PathFormErrors
+
+Provides an outlet to render all errors in the form in one place.
+The `errors` given back are [flattened store items](#PathFormStoreItemFlat),
+which wraps each store item with `path`, `dotpath`, and `storeItem`, which
+you could use to pick or omit certain fields from rendering.
+
+```tsx
+<PathFormErrors
+  render={(errors: Array<PathFormStoreItemFlat>) => {
+    // you can pick or filter specific errors if you want
+    return (
+      <>
+        {errors.map((error) => {
+          return <AlertError message={error.storeItem.meta.error.message}>;
+        }}
+      </>
+    );
+  }}
 />
 ```
 
@@ -315,6 +338,16 @@ type PathFormStoreMeta = {
   dirty: boolean;
   touched: boolean;
   error: null;
+};
+```
+
+### PathFormStoreItemFlat
+
+```ts
+type PathFormStoreItemFlat = {
+  dotpath: string;
+  path: PathFormPath;
+  storeItem: PathFormStoreItem;
 };
 ```
 
