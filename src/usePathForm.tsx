@@ -129,7 +129,7 @@ const PathFormStateContext = React.createContext<PathFormStateContextInitialized
 
 PathFormStateContext.displayName = 'PathFormStateContext';
 
-interface PathFormProviderProps {
+export interface PathFormProviderProps {
   initialRenderValues?: any; // TODO generics or something
   children: React.ReactNode;
 }

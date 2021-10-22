@@ -1,9 +1,25 @@
 {
   "name": "react-pathform",
+  "description": "A react hooks library for recursive, nested, dynamic forms.",
   "version": "0.1.3",
   "author": "Ian Lovett",
   "repository": "github:ilovett/react-pathform",
   "homepage": "https://github.com/ilovett/react-pathform",
+  "keywords": [
+    "react",
+    "pathform",
+    "form",
+    "forms",
+    "validation",
+    "yup",
+    "typescript",
+    "hooks",
+    "react-hooks",
+    "recursive",
+    "nested",
+    "dynamic",
+    "performance"
+  ],
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -50,6 +66,7 @@
     "eslint-config-react-app": "^6.0.0",
     "husky": "^5.0.9",
     "jest": "^27.0.6",
+    "lint-staged": "^11.2.3",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-test-renderer": "^16.14.0",
@@ -66,8 +83,14 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "tsdx lint"
+      "pre-commit": "yarn lint && lint-staged",
+      "pre-push": "yarn lint && yarn test && yarn build && yarn size"
     }
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "prettier --write"
+    ]
   },
   "prettier": {
     "printWidth": 140,
