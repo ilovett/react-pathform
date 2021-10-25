@@ -6,6 +6,7 @@ export * from './usePathForm';
 export * from './usePathFormDotPath';
 export * from './usePathFormStorePath';
 export * from './usePathFormValue';
+export * from './usePathFormDirty';
 export * from './usePathFormErrors';
 export * from './storeUtils';
 

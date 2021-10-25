@@ -1,5 +1,6 @@
 import lodashSet from 'lodash/set';
 import lodashGet from 'lodash/get';
+import lodashIsEqual from 'lodash/isEqual';
 import lodashMapValues from 'lodash/mapValues';
 import { v4 as uuidv4 } from 'uuid';
 import { ObjectIterator } from 'lodash';
@@ -64,6 +65,10 @@ export const validateNewStorePath = (store: PathFormStore, storePath: PathFormPa
 
 export const mapValues = <T>(obj: object, callback: ObjectIterator<object, T>): any => {
   return lodashMapValues(obj, callback);
+};
+
+export const isEqual = (a: any, b: any) => {
+  return lodashIsEqual(a, b);
 };
 
 export const uuid = () => {
@@ -231,36 +236,40 @@ export const arrayRemove = (arr: any[], index: number): void => {
   arr.splice(index, 1);
 };
 
-export const createStoreItemMeta = (): PathFormStoreMeta => {
+export const createStoreItemMeta = (defaultValue?: any): PathFormStoreMeta => {
   return {
     uuid: uuid(),
     dirty: false,
     touched: false,
     error: null,
     validations: null,
+    defaultValue,
   };
 };
 
 export const createStoreItemPrimitive = (item: any): PathFormStorePrimitive => {
   return {
     type: 'primitive',
-    meta: createStoreItemMeta(),
+    meta: createStoreItemMeta(item),
     value: item,
   };
 };
 
 export const createStoreItemArray = (item: any[]): PathFormStoreArray => {
+  const value = item.map((i) => createStoreItem(i));
+  const defaultFieldUuids = value.map((i) => i.meta.uuid);
+
   return {
     type: 'array',
-    meta: createStoreItemMeta(),
-    value: item.map((i) => createStoreItem(i)),
+    meta: { ...createStoreItemMeta(item), defaultFieldUuids },
+    value,
   };
 };
 
 export const createStoreItemObject = (item: any): PathFormStoreObject => {
   return {
     type: 'object',
-    meta: createStoreItemMeta(),
+    meta: createStoreItemMeta(item),
     value: mapValues(item, createStoreItem),
   };
 };
