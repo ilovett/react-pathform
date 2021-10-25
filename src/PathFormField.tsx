@@ -42,7 +42,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
       // TODO handle all sorts of values
       const value = event?.target?.value ?? event;
       setValue(path, value);
-      setMeta(path, { dirty: true });
+      // setMeta(path, { dirty: true });
 
       if (publish?.path) {
         // TODO this value is wrong and should just be publish(publish?.path) -- if no value given, get the store value as-is

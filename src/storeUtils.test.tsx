@@ -22,13 +22,14 @@ jest.mock('uuid', () => ({
   v4: () => mockUuid(),
 }));
 
-const createMetaHelper = (uuid: string) => {
+const createMetaHelper = (uuid: string, defaultValue: any) => {
   return {
     uuid,
     dirty: false,
     touched: false,
     error: null,
     validations: null,
+    defaultValue,
   };
 };
 
@@ -53,6 +54,7 @@ describe('set', () => {
                 "primitiveLeaf": Object {
                   "value": Object {
                     "meta": Object {
+                      "defaultValue": "Hello World",
                       "dirty": false,
                       "error": null,
                       "touched": false,
@@ -83,6 +85,7 @@ describe('set', () => {
         "rootItem": Object {
           "value": Object {
             "meta": Object {
+              "defaultValue": undefined,
               "dirty": false,
               "error": null,
               "touched": false,
@@ -92,6 +95,7 @@ describe('set', () => {
             "parentObject": Object {
               "value": Object {
                 "meta": Object {
+                  "defaultValue": undefined,
                   "dirty": false,
                   "error": null,
                   "touched": false,
@@ -101,6 +105,7 @@ describe('set', () => {
                 "primitiveLeaf": Object {
                   "value": Object {
                     "meta": Object {
+                      "defaultValue": "Hello World",
                       "dirty": false,
                       "error": null,
                       "touched": false,
@@ -205,47 +210,66 @@ describe('createStoreItemObject', () => {
 
 describe('createStoreItemArray', () => {
   it('works as expected', () => {
-    expect(createStoreItemArray([1, 2, 3])).toMatchObject({
-      type: 'array',
-      meta: {
-        uuid: 'uuid-1',
-        dirty: false,
-        touched: false,
-        error: null,
-      },
-      value: [
-        {
-          type: 'primitive',
-          meta: {
-            uuid: 'uuid-2',
-            dirty: false,
-            touched: false,
-            error: null,
-          },
-          value: 1,
+    expect(createStoreItemArray([1, 2, 3])).toMatchInlineSnapshot(`
+      Object {
+        "meta": Object {
+          "defaultFieldUuids": Array [
+            "uuid-1",
+            "uuid-2",
+            "uuid-3",
+          ],
+          "defaultValue": Array [
+            1,
+            2,
+            3,
+          ],
+          "dirty": false,
+          "error": null,
+          "touched": false,
+          "uuid": "uuid-4",
+          "validations": null,
         },
-        {
-          type: 'primitive',
-          meta: {
-            uuid: 'uuid-3',
-            dirty: false,
-            touched: false,
-            error: null,
+        "type": "array",
+        "value": Array [
+          Object {
+            "meta": Object {
+              "defaultValue": 1,
+              "dirty": false,
+              "error": null,
+              "touched": false,
+              "uuid": "uuid-1",
+              "validations": null,
+            },
+            "type": "primitive",
+            "value": 1,
           },
-          value: 2,
-        },
-        {
-          type: 'primitive',
-          meta: {
-            uuid: 'uuid-4',
-            dirty: false,
-            touched: false,
-            error: null,
+          Object {
+            "meta": Object {
+              "defaultValue": 2,
+              "dirty": false,
+              "error": null,
+              "touched": false,
+              "uuid": "uuid-2",
+              "validations": null,
+            },
+            "type": "primitive",
+            "value": 2,
           },
-          value: 3,
-        },
-      ],
-    });
+          Object {
+            "meta": Object {
+              "defaultValue": 3,
+              "dirty": false,
+              "error": null,
+              "touched": false,
+              "uuid": "uuid-3",
+              "validations": null,
+            },
+            "type": "primitive",
+            "value": 3,
+          },
+        ],
+      }
+    `);
   });
 });
 
@@ -259,21 +283,21 @@ describe('createStore', () => {
     ).toMatchObject({
       name: {
         type: 'primitive',
-        meta: createMetaHelper('uuid-1'),
+        meta: createMetaHelper('uuid-1', 'Special Orders TODO'),
         value: 'Special Orders TODO',
       },
       items: {
         type: 'array',
-        meta: createMetaHelper('uuid-2'),
+        meta: { ...createMetaHelper('uuid-4', [1, 2]), defaultFieldUuids: ['uuid-2', 'uuid-3'] },
         value: [
           {
             type: 'primitive',
-            meta: createMetaHelper('uuid-3'),
+            meta: createMetaHelper('uuid-2', 1),
             value: 1,
           },
           {
             type: 'primitive',
-            meta: createMetaHelper('uuid-4'),
+            meta: createMetaHelper('uuid-3', 2),
             value: 2,
           },
         ],
@@ -287,7 +311,7 @@ describe('parseStoreItemPrimitive', () => {
     expect(
       parseStoreItemPrimitive({
         type: 'primitive',
-        meta: createMetaHelper('string-example'),
+        meta: createMetaHelper('string-example', 'Hello World!'),
         value: 'Hello World!',
       })
     ).toBe('Hello World!');
@@ -295,7 +319,7 @@ describe('parseStoreItemPrimitive', () => {
     expect(
       parseStoreItemPrimitive({
         type: 'primitive',
-        meta: createMetaHelper('boolean-example'),
+        meta: createMetaHelper('boolean-example', false),
         value: false,
       })
     ).toBe(false);
@@ -303,7 +327,7 @@ describe('parseStoreItemPrimitive', () => {
     expect(
       parseStoreItemPrimitive({
         type: 'primitive',
-        meta: createMetaHelper('number-example'),
+        meta: createMetaHelper('number-example', 420.69),
         value: 420.69, // $GME
       })
     ).toBe(420.69);
@@ -321,6 +345,11 @@ describe('parseStoreItemObject', () => {
           touched: false,
           error: null,
           validations: null,
+          defaultValue: {
+            one: 1,
+            two: 2,
+            arrayExample: ['hello world', false],
+          },
         },
         value: {
           one: {
@@ -331,6 +360,7 @@ describe('parseStoreItemObject', () => {
               touched: false,
               error: null,
               validations: null,
+              defaultValue: 1,
             },
             value: 1,
           },
@@ -342,21 +372,22 @@ describe('parseStoreItemObject', () => {
               touched: false,
               error: null,
               validations: null,
+              defaultValue: 2,
             },
             value: 2,
           },
           arrayExample: {
             type: 'array',
-            meta: createMetaHelper('uuid-4'),
+            meta: { ...createMetaHelper('uuid-4', ['hello world', false]), defaultFieldUuids: ['uuid-5', 'uuid-6'] },
             value: [
               {
                 type: 'primitive',
-                meta: createMetaHelper('uuid-5'),
+                meta: createMetaHelper('uuid-5', 'hello world'),
                 value: 'hello world',
               },
               {
                 type: 'primitive',
-                meta: createMetaHelper('uuid-6'),
+                meta: createMetaHelper('uuid-6', false),
                 value: false,
               },
             ],
@@ -382,6 +413,8 @@ describe('parseStoreItemArray', () => {
           touched: false,
           error: null,
           validations: null,
+          defaultValue: [1, 2, 3],
+          defaultFieldUuids: ['uuid-2', 'uuid-3', 'uuid-4'],
         },
         value: [
           {
@@ -392,6 +425,7 @@ describe('parseStoreItemArray', () => {
               touched: false,
               error: null,
               validations: null,
+              defaultValue: 1,
             },
             value: 1,
           },
@@ -403,6 +437,7 @@ describe('parseStoreItemArray', () => {
               touched: false,
               error: null,
               validations: null,
+              defaultValue: 2,
             },
             value: 2,
           },
@@ -414,6 +449,7 @@ describe('parseStoreItemArray', () => {
               touched: false,
               error: null,
               validations: null,
+              defaultValue: 3,
             },
             value: 3,
           },
@@ -435,6 +471,8 @@ describe('flattenStore', () => {
             touched: false,
             error: null,
             validations: null,
+            defaultValue: [1, 2, 3],
+            defaultFieldUuids: ['uuid-2', 'uuid-3', 'uuid-4'],
           },
           value: [
             {
@@ -445,6 +483,7 @@ describe('flattenStore', () => {
                 touched: false,
                 error: null,
                 validations: null,
+                defaultValue: 1,
               },
               value: 1,
             },
@@ -456,6 +495,7 @@ describe('flattenStore', () => {
                 touched: false,
                 error: null,
                 validations: null,
+                defaultValue: 2,
               },
               value: 2,
             },
@@ -467,6 +507,7 @@ describe('flattenStore', () => {
                 touched: false,
                 error: null,
                 validations: null,
+                defaultValue: 3,
               },
               value: 3,
             },

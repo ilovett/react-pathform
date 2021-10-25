@@ -21,10 +21,11 @@ test('should return the expected value and meta', () => {
   expect(result.current[0]).toEqual('Joey Joe Joe Jr. Shabadoo');
   expect(result.current[1]).toMatchInlineSnapshot(`
     Object {
+      "defaultValue": "Joey Joe Joe Jr. Shabadoo",
       "dirty": false,
       "error": null,
       "touched": false,
-      "uuid": "uuid-4",
+      "uuid": "uuid-3",
       "validations": null,
     }
   `);

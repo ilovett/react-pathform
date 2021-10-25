@@ -11,6 +11,7 @@ import {
   createStore,
   eventEmitter,
   parseStore,
+  isEqual,
 } from '.';
 import { flattenStore, PathFormStoreItemFlat } from './storeUtils';
 
@@ -18,8 +19,9 @@ export type PathFormValuePrimitive = string | number | boolean | null;
 
 export type PathFormState = {
   store: PathFormStore;
+  dirtyUuids: string[];
   errors: PathFormStoreItemFlat[];
-  defaults: object;
+  defaultValues: any;
 };
 
 export type PathFormPath = Array<string | number>; // | string;
@@ -40,6 +42,7 @@ export type PathFormStoreMeta = {
   touched: boolean;
   error: null | PathFormError;
   validations: null | Array<PathFormValidation>;
+  defaultValue: any;
 };
 
 // TODO omit error?
@@ -68,7 +71,7 @@ export type PathFormStoreObject = {
 
 export type PathFormStoreArray = {
   type: 'array';
-  meta: PathFormStoreMeta;
+  meta: PathFormStoreMeta & { defaultFieldUuids: string[] };
   value: Array<PathFormStoreItem>;
 };
 
@@ -80,6 +83,10 @@ export type PathFormStoreInput = {
 
 export type PathFormStore = {
   [key: string]: PathFormStoreItem;
+};
+
+export type PathFormResetOptions = {
+  defaultValues?: any;
 };
 
 type PathFormWatcher = Readonly<{
@@ -105,6 +112,8 @@ type PathFormStateContext = {
   forEachStoreItem: (callback: (item: PathFormStoreItemFlat) => any) => any;
   validate: (path: PathFormPath) => any;
   validateStore: () => any; // TODO throws?
+  isDirty: () => boolean;
+  reset: (options?: PathFormResetOptions) => any;
 };
 
 export type PathFormArrayUtils = {
@@ -137,8 +146,9 @@ export interface PathFormProviderProps {
 export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, initialRenderValues }) => {
   const state = React.useRef<PathFormState>({
     store: createStore(initialRenderValues),
+    dirtyUuids: [],
     errors: [],
-    defaults: initialRenderValues,
+    defaultValues: initialRenderValues,
   });
   const watchers = React.useRef(eventEmitter());
 
@@ -260,6 +270,28 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
         throw new Error('Unhandled setValue case.');
       }
 
+      // check if field is dirty
+      const dirty = storeItem?.meta.defaultValue !== value;
+
+      // if dirty value changes, add or remove from dirtyFields
+      if (!!storeItem && dirty !== storeItem.meta.dirty) {
+        // determine if previously dirty
+        const dirtyIndex = state.current.dirtyUuids.indexOf(storeItem.meta.uuid);
+
+        // not dirty anymore, but previously dirty
+        if (!dirty && dirtyIndex >= 0) {
+          arrayRemove(state.current.dirtyUuids, dirtyIndex);
+        }
+        // dirty and not previously dirty
+        else if (dirty && dirtyIndex < 0) {
+          state.current.dirtyUuids.push(storeItem.meta.uuid);
+        }
+
+        watchers.current.emit('dirty', state.current.dirtyUuids);
+      }
+
+      set(state.current.store, [...storePath, 'meta', 'dirty'], dirty);
+
       watchers.current.emit(toDotPath(path), value);
     }
   };
@@ -356,7 +388,7 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
   // validate that the storeItem is an array, do some callback action, and emit
   const mutateArray = (path: PathFormPath, mutate: (targetArrayStoreItem: PathFormStoreArray) => any) => {
     const dotpath = toDotPath(path);
-    const targetArrayStoreItem = get(state.current.store, toStorePath(path));
+    const targetArrayStoreItem = get(state.current.store, toStorePath(path)) as PathFormStoreArray | undefined;
 
     // validate that the target value is an array
     if (targetArrayStoreItem?.type !== 'array' || !Array.isArray(targetArrayStoreItem?.value)) {
@@ -366,9 +398,69 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
     // do the mutation
     mutate(targetArrayStoreItem);
 
+    // dirty checks on array field
+    // compare new array of fields uuid structure
+    const currentFieldUuids = targetArrayStoreItem.value.map((storeItem) => storeItem.meta.uuid);
+    const dirtyIndex = state.current.dirtyUuids.indexOf(targetArrayStoreItem.meta.uuid);
+
+    // if current field state is equal to default state field uuids
+    // unmark it as dirty
+    if (isEqual(currentFieldUuids, targetArrayStoreItem.meta.defaultFieldUuids)) {
+      targetArrayStoreItem.meta.dirty = false;
+
+      // remove it from the dirty uuids if found
+      if (dirtyIndex >= 0) {
+        arrayRemove(state.current.dirtyUuids, dirtyIndex);
+        watchers.current.emit('dirty', state.current.dirtyUuids);
+      }
+    }
+    // fields look different
+    else {
+      targetArrayStoreItem.meta.dirty = true;
+
+      // and not already dirty, save the array uuid to dirty fields
+      if (dirtyIndex === -1) {
+        state.current.dirtyUuids.push(targetArrayStoreItem.meta.uuid);
+        watchers.current.emit('dirty', state.current.dirtyUuids);
+      }
+    }
+
     // notify subscribers
     watchers.current.emit(dotpath, targetArrayStoreItem);
   };
+
+  /**
+   * Returns `true` if at least one field has been modified in the form.
+   */
+  function isDirty() {
+    return state.current.dirtyUuids.length > 0;
+  }
+
+  /**
+   * Resets the form to defaultValues, or updates the defaultValues if given.
+   *
+   * @param options
+   */
+  function reset(options: PathFormResetOptions = {}) {
+    // TODO currrently im being lazy and just recreating the entire store
+    // which gives us new uuids -- this may lead to bugs
+    // a future improvement (and/or option for reset)
+    // may be to keep original uuid values in place, if possible, by merge
+    const newDefaultValues = typeof options.defaultValues !== 'undefined' ? options.defaultValues : state.current.defaultValues;
+    const newStore = createStore(newDefaultValues);
+
+    state.current.store = newStore;
+    state.current.defaultValues = newDefaultValues;
+    state.current.dirtyUuids = [];
+    state.current.errors = [];
+
+    // notify every store item to re-render
+    forEachStoreItem((flatStoreItem) => watchers.current.emit(flatStoreItem.dotpath, flatStoreItem.storeItem.value));
+
+    // notify store meta dirty / errors
+    watchers.current.emit('dirty', state.current.dirtyUuids);
+    watchers.current.emit('errors', state.current.errors);
+  }
 
   const array = {
     append: (path: PathFormPath, item: any) => {
@@ -415,6 +507,8 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
         forEachStoreItem,
         validate,
         validateStore,
+        isDirty,
+        reset,
       }}
     >
       {children}
@@ -424,8 +518,10 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
 
 export function usePathForm() {
   const context = React.useContext(PathFormStateContext) as PathFormStateContext;
-  if (!context) {
+
+  if (!context || context.state === null || context.watchers === null) {
     throw new Error('`usePathForm` must be used within a `PathFormProvider`');
   }
+
   return context;
 }

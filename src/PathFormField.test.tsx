@@ -38,7 +38,7 @@ describe('PathFormField', () => {
       <pre
         data-testid="meta"
       >
-        {"uuid":"uuid-4","dirty":false,"touched":false,"error":null,"validations":null}
+        {"uuid":"uuid-3","dirty":false,"touched":false,"error":null,"validations":null,"defaultValue":"Joey Joe Joe Jr. Shabadoo"}
       </pre>
     `);
     expect(getByLabelText(container, 'Name')).toHaveDisplayValue('Joey Joe Joe Jr. Shabadoo');
@@ -59,7 +59,6 @@ describe('PathFormField', () => {
     expect(getByLabelText(container, 'Name')).toHaveDisplayValue(/ new text$/);
 
     // rendered 9 times due to typing 9 characters
-    // TODO currently its double, 18, until setDirty and setValue trigger one render
-    expect(getByTestId(container, 'renders')).toHaveTextContent('18');
+    expect(getByTestId(container, 'renders')).toHaveTextContent('9');
   });
 });

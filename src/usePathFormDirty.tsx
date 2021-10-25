@@ -2,15 +2,15 @@ import { useDebugValue, useMemo } from 'react';
 import { usePathForm } from './usePathForm';
 import { usePathFormSubscription } from './usePathFormSubscription';
 
-export const usePathFormErrors = () => {
-  const renders = usePathFormSubscription('errors');
+export function usePathFormDirtyUuids() {
+  const renders = usePathFormSubscription('dirty');
   const { state } = usePathForm();
 
-  useDebugValue(state.current.errors);
+  useDebugValue(state.current.dirtyUuids);
 
   return useMemo(() => {
-    return state.current.errors;
+    return state.current.dirtyUuids;
     // ignore state ref dependency
     // eslint-disable-next-line
   }, [renders]);
-};
+}

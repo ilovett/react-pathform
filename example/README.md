@@ -3,7 +3,7 @@
 Before starting, ensure you have built the library `dist` building locally:
 
 ```
-cd pathform
+cd react-pathform
 yarn start
 ```
 

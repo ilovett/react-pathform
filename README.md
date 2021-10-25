@@ -214,7 +214,7 @@ Use this hook from any child component scope to access the context of your form.
 Returns the form context provider `object` with helper functions:
 
 ```ts
-const { setValue, setTouched, addError, clearError, array } = usePathForm();
+const { setValue, setTouched, addError, clearError, reset, isDirty, array } = usePathForm();
 ```
 
 #### `setValue(path: PathFormPath, value: any)`
@@ -232,6 +232,14 @@ Adds an `error` at the given `path`.
 #### `clearError(path: PathFormPath)`
 
 Clears an `error` at the given `path`.
+
+#### `reset(options?: PathFormResetOptions)`
+
+Resets the form to existing `defaultValues` (from `initialRenderValues`), or changes and resets to new `defaultValues` if provided in options.
+
+#### `isDirty()`
+
+Checks if any fields in the form have are dirty.  You could use this to check for unsaved changes before navigating away.
 
 #### `array: PathFormArrayUtils`
 
@@ -349,6 +357,14 @@ type PathFormStoreItemFlat = {
   path: PathFormPath;
   storeItem: PathFormStoreItem;
 };
+```
+
+### PathFormResetOptions
+
+```ts
+type PathFormResetOptions = {
+  defaultValues?: any;
+}
 ```
 
 <br/><br/>
