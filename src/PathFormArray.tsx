@@ -53,7 +53,10 @@ export const PathFormArray: React.FC<PathFormArrayProps> = ({ path, renderItem, 
       // create and set the storeItem if not exists, this is probably first render
       if (!storeItem) {
         storeItem = createStoreItem(row);
-        set(state.current.store, toStorePath(itemPath), storeItem);
+
+        // since we are setting store items on array child indices, we need to verify that the parent array store item is valid
+        // so we will validate the parent path only on the first child index, and assume it is valid after that
+        set(state.current.store, toStorePath(itemPath), storeItem, { validateParentPath: isFirst });
       }
 
       const { meta } = storeItem;
