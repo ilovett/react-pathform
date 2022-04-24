@@ -51,7 +51,7 @@ export type PathFormStoreSetMeta = Partial<Omit<PathFormStoreMeta, 'uuid'>>;
 export type PathFormValidation =
   | { type: 'required'; message: string }
   | { type: 'minLength' | 'maxLength' | 'min' | 'max'; value: number; message: string }
-  | { type: 'regex'; value: string; flags?: string; message: string };
+  | { type: 'regex'; value: RegExp; message: string };
 
 export type PathFormValueType = 'primitive' | 'object' | 'array';
 
@@ -215,8 +215,7 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
             }
           } else if (validation.type === 'regex') {
             try {
-              const regex = new RegExp(validation.value, validation.flags);
-
+              const regex = validation.value;
               if (typeof storeItem.value === 'string' && !regex.test(storeItem.value)) {
                 addError(path, validation);
               }
