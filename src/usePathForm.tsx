@@ -192,6 +192,12 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
 
     if (storeItem.meta.validations) {
       storeItem.meta.validations.forEach((validation) => {
+        // do nothing if the store item already has a validation error
+        // TODO this may eventually get eliminated once a field can have multiple errors
+        if (storeItem.meta.error) {
+          return;
+        }
+
         if (storeItem.type === 'primitive') {
           if (validation.type === 'required') {
             if (storeItem.value === null || (typeof storeItem.value === 'string' && storeItem.value === '')) {
