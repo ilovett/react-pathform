@@ -13,15 +13,6 @@ import {
   createStoreItem,
 } from './storeUtils';
 
-let mockUuidCounter = 1;
-let mockUuid = jest.fn().mockImplementation(() => {
-  return `uuid-${mockUuidCounter++}`;
-});
-
-jest.mock('uuid', () => ({
-  v4: () => mockUuid(),
-}));
-
 const createMetaHelper = (uuid: string, defaultValue: any) => {
   return {
     uuid,
@@ -32,10 +23,6 @@ const createMetaHelper = (uuid: string, defaultValue: any) => {
     defaultValue,
   };
 };
-
-beforeEach(() => {
-  mockUuidCounter = 1;
-});
 
 describe('set', () => {
   it('doesnt validate parent paths unless explicitly defined', () => {

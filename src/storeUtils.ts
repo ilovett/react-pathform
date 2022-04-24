@@ -2,7 +2,6 @@ import lodashSet from 'lodash/set';
 import lodashGet from 'lodash/get';
 import lodashIsEqual from 'lodash/isEqual';
 import lodashMapValues from 'lodash/mapValues';
-import { v4 as uuidv4 } from 'uuid';
 import { ObjectIterator } from 'lodash';
 
 import {
@@ -17,6 +16,7 @@ import {
   PathFormValuePrimitive,
   PathFormValueType,
 } from './usePathForm';
+import { uuidv4 } from './uuidv4';
 
 // tree shakeable wrappers
 // TODO eventually completely remove these 3rd party library dependencies
@@ -69,10 +69,6 @@ export const mapValues = <T>(obj: object, callback: ObjectIterator<object, T>): 
 
 export const isEqual = (a: any, b: any) => {
   return lodashIsEqual(a, b);
-};
-
-export const uuid = () => {
-  return uuidv4();
 };
 
 /**
@@ -238,7 +234,7 @@ export const arrayRemove = (arr: any[], index: number): void => {
 
 export const createStoreItemMeta = (defaultValue?: any): PathFormStoreMeta => {
   return {
-    uuid: uuid(),
+    uuid: uuidv4(),
     dirty: false,
     touched: false,
     error: null,

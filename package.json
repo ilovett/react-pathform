@@ -34,8 +34,8 @@
   "scripts": {
     "start": "tsdx watch",
     "build": "tsdx build",
-    "test": "DEBUG_PRINT_LIMIT=30000 tsdx test --passWithNoTests --runInBand",
-    "test:debug": "DEBUG_PRINT_LIMIT=30000 node --inspect-brk=127.0.0.1:9500 ./node_modules/tsdx/dist/index.js test --passWithNoTests --watch --runInBand",
+    "test": "DEBUG_PRINT_LIMIT=30000 tsdx test --passWithNoTests --runInBand --env=jsdom",
+    "test:debug": "DEBUG_PRINT_LIMIT=30000 node --inspect-brk=127.0.0.1:9500 ./node_modules/tsdx/dist/index.js test --passWithNoTests --watch --runInBand  --env=jsdom",
     "test:ci": "tsdx test --passWithNoTests --ci --coverage",
     "lint": "tsdx lint",
     "prepare": "tsdx build",
@@ -44,8 +44,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.20",
-    "lodash-es": "^4.17.20",
-    "uuid": "^3.4.0"
+    "lodash-es": "^4.17.20"
   },
   "peerDependencies": {
     "react": ">=16.9.0"

@@ -3,15 +3,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { PathFormProvider } from '.';
 import { usePathFormValue } from './usePathFormValue';
 
-let mockUuidCounter = 1;
-let mockUuid = jest.fn().mockImplementation(() => {
-  return `uuid-${mockUuidCounter++}`;
-});
-
-jest.mock('uuid', () => ({
-  v4: () => mockUuid(),
-}));
-
 test('should return the expected value and meta', () => {
   const wrapper = ({ children }: { children: React.ReactChildren }) => (
     <PathFormProvider initialRenderValues={{ nested: { items: [{ name: 'Joey Joe Joe Jr. Shabadoo' }] } }}>{children}</PathFormProvider>
