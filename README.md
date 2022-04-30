@@ -120,7 +120,7 @@ The value use on the initial render, if the store item does not already exist.
 
 The callback to render the field.
 
-#### PathFormField `validations: PathFormValidation[]`
+#### PathFormField `prevs: PathFormValidation[]`
 
 Register [validations](#PathFormValidation) for this field.
 
@@ -294,6 +294,54 @@ const [ageValue, ageMeta] = usePathFormValue(['person', 'age']);
 
 <br/><br/>
 
+## Validation
+
+### Native
+
+`react-pathform` has basic [validators](#PathFormValidation) which you can define on each field.
+
+```tsx
+<PathFormField
+  path={['email']}
+  defaultValue=""
+  validators={[
+    { type: 'required', message: 'Email is required' },
+    { type: 'regex', value: REGEX_EMAIL, message: 'Email is invalid' },
+  ]}
+  render={({ inputProps, meta }) => {
+    return (
+      <TextField
+        label="Email"
+        placeholder="you@example.com"
+        {...inputProps}
+        error={!!meta.error}
+        helperText={meta.error?.message}
+      />
+    )
+  }}
+/>
+```
+
+### Yup
+
+You can validate against a `yup` schema with `validateYupSchema`.
+
+```jsx
+<PathForm
+  onValidate={validateYupSchema(schema)}
+  onSubmit={(values) => {
+    // validated!
+    console.log(values);
+  }}
+>
+```
+
+### Other
+
+You can Bring Your Own Validator.
+Take a look at [validateYupSchema](./src/validators.ts).
+
+
 ## Types
 
 ### PathFormPath
@@ -325,7 +373,7 @@ type PathFormInputProps = {
 type PathFormValidation =
   | { type: 'required'; message: string }
   | { type: 'minLength' | 'maxLength' | 'min' | 'max'; value: number; message: string }
-  | { type: 'regex'; value: string; flags?: string; message: string };
+  | { type: 'regex'; value: RegExp; message: string };
 ```
 
 ### PathFormError
