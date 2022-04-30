@@ -3,7 +3,7 @@ import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PathFormProvider } from './usePathForm';
 import { PathFormField } from './PathFormField';
-import { PathFormArray, usePathForm, usePathFormDirtyUuids } from '.';
+import { PathForm, PathFormArray, usePathForm, usePathFormDirtyUuids } from '.';
 
 const initialRenderValues = {
   firstName: 'Joey Joe Joe Jr.',
@@ -238,6 +238,37 @@ describe('PathForm', () => {
           []
         </div>
       `);
+    });
+  });
+});
+
+describe('PathForm', () => {
+  describe('onSubmitEvent', () => {
+    const onSubmitParent = jest.fn();
+    const onSubmit = jest.fn();
+
+    it('allows handling of form submit event', () => {
+      const view = render(
+        <div onSubmit={onSubmitParent}>
+          <PathFormProvider initialRenderValues={initialRenderValues}>
+            <PathForm onSubmit={onSubmit} onSubmitEvent={(event) => event?.stopPropagation()}>
+              <button type="submit">Submit</button>
+            </PathForm>
+          </PathFormProvider>
+        </div>
+      );
+
+      userEvent.click(view.getByText('Submit'));
+
+      expect(onSubmit).toHaveBeenCalled();
+      expect(onSubmit).toHaveBeenCalledWith({
+        firstName: 'Joey Joe Joe Jr.',
+        lastName: 'Sabadoo',
+        friends: [{ firstName: 'Homer' }, { firstName: 'Barney' }],
+      });
+
+      // onSubmitEvent stopPropagation
+      expect(onSubmitParent).not.toHaveBeenCalled();
     });
   });
 });
