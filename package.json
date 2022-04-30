@@ -97,11 +97,11 @@
   "size-limit": [
     {
       "path": "dist/react-pathform.cjs.production.min.js",
-      "limit": "15 KB"
+      "limit": "10 KB"
     },
     {
       "path": "dist/react-pathform.esm.js",
-      "limit": "15 KB"
+      "limit": "10 KB"
     }
   ],
   "resolutions": {
