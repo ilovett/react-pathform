@@ -42,10 +42,6 @@
     "size": "size-limit",
     "analyze": "size-limit --why"
   },
-  "dependencies": {
-    "lodash": "^4.17.20",
-    "lodash-es": "^4.17.20"
-  },
   "peerDependencies": {
     "react": ">=16.9.0"
   },

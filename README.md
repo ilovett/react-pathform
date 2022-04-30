@@ -412,6 +412,4 @@ Primitive values cannot have any children.
 
 - [ ] Reset to `defaultValues`
 - [ ] Meta `dirty` / `touched`
-- [ ] Drop `uuid` dependency
-- [ ] Drop `lodash` dependency
 - [ ] CONTRIBUTING.md

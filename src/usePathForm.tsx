@@ -11,9 +11,9 @@ import {
   createStore,
   eventEmitter,
   parseStore,
-  isEqual,
 } from '.';
 import { flattenStore, PathFormStoreItemFlat } from './storeUtils';
+import { noDifference } from './utils';
 
 export type PathFormValuePrimitive = string | number | boolean | null;
 
@@ -410,7 +410,7 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
 
     // if current field state is equal to default state field uuids
     // unmark it as dirty
-    if (isEqual(currentFieldUuids, targetArrayStoreItem.meta.defaultFieldUuids)) {
+    if (noDifference(currentFieldUuids, targetArrayStoreItem.meta.defaultFieldUuids)) {
       targetArrayStoreItem.meta.dirty = false;
 
       // remove it from the dirty uuids if found

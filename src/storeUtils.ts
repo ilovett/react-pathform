@@ -1,9 +1,3 @@
-import lodashSet from 'lodash/set';
-import lodashGet from 'lodash/get';
-import lodashIsEqual from 'lodash/isEqual';
-import lodashMapValues from 'lodash/mapValues';
-import { ObjectIterator } from 'lodash';
-
 import {
   PathFormPath,
   PathFormStore,
@@ -17,11 +11,10 @@ import {
   PathFormValueType,
 } from './usePathForm';
 import { uuidv4 } from './uuidv4';
+import { getValue, mapValues, setValue } from './utils';
 
-// tree shakeable wrappers
-// TODO eventually completely remove these 3rd party library dependencies
 export const get = (store: PathFormStore, storePath: PathFormPath, defaultValue?: any) => {
-  return lodashGet(store, storePath, defaultValue);
+  return getValue(store, storePath, defaultValue);
 };
 
 type PathFormSetStoreOptions = {
@@ -30,7 +23,7 @@ type PathFormSetStoreOptions = {
 
 // TODO eventually this should recursively start from the root and update recursively
 export const set = (store: PathFormStore, storePath: PathFormPath, value: any, options?: PathFormSetStoreOptions) => {
-  const result = lodashSet(store, storePath, value);
+  const result = setValue(store, storePath, value);
 
   // ensure types and meta are set on parent paths
   // there is a bug here when setting on path where the last item is not 'value' -- IE: when set(.., [..., 'meta'])
@@ -61,14 +54,6 @@ export const validateNewStorePath = (store: PathFormStore, storePath: PathFormPa
   if (storePath.length > 2) {
     validateNewStorePath(store, storePath.slice(0, storePath.length - 2));
   }
-};
-
-export const mapValues = <T>(obj: object, callback: ObjectIterator<object, T>): any => {
-  return lodashMapValues(obj, callback);
-};
-
-export const isEqual = (a: any, b: any) => {
-  return lodashIsEqual(a, b);
 };
 
 /**
