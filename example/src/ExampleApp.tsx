@@ -5,7 +5,15 @@ import DeleteIcon from '@material-ui/icons/DeleteRounded';
 import ArrowUpIcon from '@material-ui/icons/ArrowUpwardRounded';
 import ArrowDownIcon from '@material-ui/icons/ArrowDownwardRounded';
 
-import { PathForm, PathFormArray, PathFormField, PathFormProvider, usePathForm, usePathFormValue } from '../../dist';
+import {
+  PathForm,
+  PathFormArray,
+  PathFormField,
+  PathFormProvider,
+  usePathForm,
+  usePathFormValue,
+  PathFormValidationMode,
+} from '../../dist';
 import { PathFormDevTools } from './ExamplePathFormDevTools';
 
 const fetchedData = {
@@ -17,25 +25,57 @@ const fetchedData = {
 };
 
 export const ExampleApp = () => {
+  const [mode, setMode] = React.useState<PathFormValidationMode>('onSubmit');
+
+  // This will force the form to be removed and added back to the tree, this way it's possible to change the mode
+  const [showForm, setShowForm] = React.useState(true);
+  React.useEffect(() => {
+    if (!showForm) {
+      const timeout = setTimeout(() => setShowForm(true), 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [showForm]);
+
+  const onChangeMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setMode(e.target.value as PathFormValidationMode);
+    setShowForm(false);
+  };
+
   return (
-    <PathFormProvider initialRenderValues={fetchedData}>
-      <div style={{ display: 'flex', height: '100vh' }}>
-        <div style={{ width: 800, padding: 25 }}>
-          <div style={{ marginBottom: 50 }}>
-            <h2>Validations</h2>
-            <ul>
-              <li>Must have a name</li>
-              <li>Name can't be 'Joe'</li>
-              <li>Age must be 21 or older</li>
-            </ul>
-          </div>
-          <MyForm />
-        </div>
-        <aside style={{ flex: 1, overflowY: 'scroll', padding: 25 }}>
-          <PathFormDevTools />
-        </aside>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <div style={{ padding: 16, margin: 16, border: '1px solid #AAA', borderRadius: 8, backgroundColor: '#F0F0F0' }}>
+        <p style={{ margin: 0 }}>
+          <strong>Form rules</strong>
+        </p>
+        <label>
+          Select validation mode:
+          <select style={{ marginLeft: 8 }} onChange={onChangeMode}>
+            <option value="onSubmit">onSubmit</option>
+            <option value="onChange">onChange</option>
+          </select>
+        </label>
       </div>
-    </PathFormProvider>
+      {showForm && (
+        <PathFormProvider initialRenderValues={fetchedData} mode={mode}>
+          <div style={{ display: 'flex', flexGrow: 1, height: '100%' }}>
+            <div style={{ width: 800, padding: 25 }}>
+              <div style={{ marginBottom: 50 }}>
+                <h2>Validations</h2>
+                <ul>
+                  <li>Must have a name</li>
+                  <li>Name can't be 'Joe'</li>
+                  <li>Age must be 21 or older</li>
+                </ul>
+              </div>
+              <MyForm />
+            </div>
+            <aside style={{ flex: 1, overflowY: 'scroll' }}>
+              <PathFormDevTools />
+            </aside>
+          </div>
+        </PathFormProvider>
+      )}
+    </div>
   );
 };
 

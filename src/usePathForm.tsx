@@ -17,11 +17,14 @@ import { noDifference } from './utils';
 
 export type PathFormValuePrimitive = string | number | boolean | null;
 
+export type PathFormValidationMode = 'onSubmit' | 'onChange';
+
 export type PathFormState = {
   store: PathFormStore;
   dirtyUuids: string[];
   errors: PathFormStoreItemFlat[];
   defaultValues: any;
+  mode: PathFormValidationMode;
 };
 
 export type PathFormPath = Array<string | number>; // | string;
@@ -142,15 +145,18 @@ PathFormStateContext.displayName = 'PathFormStateContext';
 export interface PathFormProviderProps {
   initialRenderValues?: any; // TODO generics or something
   children: React.ReactNode;
+  mode?: PathFormValidationMode;
 }
 
-export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, initialRenderValues }) => {
+export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, initialRenderValues, mode = 'onSubmit' }) => {
   const state = React.useRef<PathFormState>({
     store: createStore(initialRenderValues),
     dirtyUuids: [],
     errors: [],
     defaultValues: initialRenderValues,
+    mode,
   });
+
   const watchers = React.useRef(eventEmitter());
 
   const getValues = () => {
@@ -191,44 +197,56 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
       throw new Error(`The target path "${dotpath}" does not exist.`);
     }
 
+    const canClearErrors = state.current.mode === 'onChange';
+
     if (storeItem.meta.validations) {
+      let hasError = !!storeItem.meta.error;
+      canClearErrors && (hasError = false);
+
       storeItem.meta.validations.forEach((validation) => {
         // do nothing if the store item already has a validation error
         // TODO this may eventually get eliminated once a field can have multiple errors
-        if (storeItem.meta.error) {
+        if (hasError) {
           return;
         }
 
         if (validation.type === 'custom') {
           if (!(validation.value && validation.value(storeItem.value, getValues()))) {
             addError(path, validation);
+            hasError = true;
           }
         } else if (storeItem.type === 'primitive') {
           if (validation.type === 'required') {
             if (storeItem.value === null || (typeof storeItem.value === 'string' && storeItem.value === '')) {
               addError(path, validation);
+              hasError = true;
             }
           } else if (validation.type === 'min') {
             if (Number(storeItem.value) < validation.value) {
               addError(path, validation);
+              hasError = true;
             }
           } else if (validation.type === 'max') {
             if (Number(storeItem.value) > validation.value) {
               addError(path, validation);
+              hasError = true;
             }
           } else if (validation.type === 'minLength') {
             if (typeof storeItem.value === 'string' && storeItem.value.length < validation.value) {
               addError(path, validation);
+              hasError = true;
             }
           } else if (validation.type === 'maxLength') {
             if (typeof storeItem.value === 'string' && storeItem.value.length > validation.value) {
               addError(path, validation);
+              hasError = true;
             }
           } else if (validation.type === 'regex') {
             try {
               const regex = validation.value;
               if (typeof storeItem.value === 'string' && !regex.test(storeItem.value)) {
                 addError(path, validation);
+                hasError = true;
               }
             } catch (err) {
               // could not compile regex
@@ -238,14 +256,18 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
           if (validation.type === 'minLength') {
             if (storeItem.value.length < validation.value) {
               addError(path, validation);
+              hasError = true;
             }
           } else if (validation.type === 'maxLength') {
             if (storeItem.value.length > validation.value) {
               addError(path, validation);
+              hasError = true;
             }
           }
         }
       });
+
+      canClearErrors && !hasError && clearError(path);
     } else {
       // clearError(path);
     }
@@ -301,6 +323,9 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
       }
 
       set(state.current.store, [...storePath, 'meta', 'dirty'], dirty);
+
+      // Validate field immediately on onChange mode
+      if (state.current.mode === 'onChange') validate(path);
 
       watchers.current.emit(toDotPath(path), value);
     }

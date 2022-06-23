@@ -35,7 +35,7 @@ export interface PathFormFieldProps {
 export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defaultValue, validations, publish }) => {
   const name = usePathFormDotPath(path);
   const [value, meta, renders] = usePathFormValue(path, defaultValue); // TODO defaultValue needed?
-  const { setValue, setMeta, clearError, watchers } = usePathForm();
+  const { setValue, setMeta, clearError, watchers, state } = usePathForm();
 
   const onChange = React.useCallback(
     (event: any) => {
@@ -62,7 +62,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
       const blurValue = event?.target?.value ?? event;
 
       // if the field has an error, and our blur value is different than the error value, clear the error
-      if (Boolean(meta?.error) && blurValue !== meta?.error?.value) {
+      if (Boolean(meta?.error) && blurValue !== meta?.error?.value && state.current.mode !== 'onChange') {
         clearError(path);
       }
 
@@ -70,7 +70,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
         setMeta(path, { touched: true });
       }
     },
-    [path, clearError, setMeta, meta]
+    [path, clearError, setMeta, meta, state.current.mode]
   );
 
   // TODO reusable hook for usePathFormValidation -> useEffect [validations]
