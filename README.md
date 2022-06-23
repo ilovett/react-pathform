@@ -131,6 +131,7 @@ Register [validations](#PathFormValidation) for this field.
   validations={[
     { type: 'required', message: 'This person must have a name.' },
     { type: 'maxLength', value: 16, message: 'This must be less than 16 characters.' },
+    { type: 'custom', value: (value) => value.trim().toLowerCase() !== 'joe', message: 'This person can\'t be Joe.' },
   ]}
   render={({ inputProps, meta }) => {
     return (
@@ -373,7 +374,8 @@ type PathFormInputProps = {
 type PathFormValidation =
   | { type: 'required'; message: string }
   | { type: 'minLength' | 'maxLength' | 'min' | 'max'; value: number; message: string }
-  | { type: 'regex'; value: RegExp; message: string };
+  | { type: 'regex'; value: RegExp; message: string }
+  | { type: 'custom'; value: (value: any, store?: any) => boolean; message: string };
 ```
 
 ### PathFormError

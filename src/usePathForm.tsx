@@ -51,7 +51,8 @@ export type PathFormStoreSetMeta = Partial<Omit<PathFormStoreMeta, 'uuid'>>;
 export type PathFormValidation =
   | { type: 'required'; message: string }
   | { type: 'minLength' | 'maxLength' | 'min' | 'max'; value: number; message: string }
-  | { type: 'regex'; value: RegExp; message: string };
+  | { type: 'regex'; value: RegExp; message: string }
+  | { type: 'custom'; value: (value: any, store?: any) => boolean; message: string };
 
 export type PathFormValueType = 'primitive' | 'object' | 'array';
 
@@ -198,7 +199,11 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
           return;
         }
 
-        if (storeItem.type === 'primitive') {
+        if (validation.type === 'custom') {
+          if (!(validation.value && validation.value(storeItem.value, getValues()))) {
+            addError(path, validation);
+          }
+        } else if (storeItem.type === 'primitive') {
           if (validation.type === 'required') {
             if (storeItem.value === null || (typeof storeItem.value === 'string' && storeItem.value === '')) {
               addError(path, validation);

@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PathFormField base renders with the value from the store 1`] = `
+<pre
+  data-testid="meta"
+>
+  {"uuid":"uuid-3","dirty":false,"touched":false,"error":null,"validations":null,"defaultValue":"Joey Joe Joe Jr. Shabadoo"}
+</pre>
+`;
+
+exports[`PathFormField base renders with the value from the store 2`] = `
+<pre
+  data-testid="renders"
+>
+  0
+</pre>
+`;
+
+exports[`PathFormField validations adds an error when another value on the store is invalid 1`] = `
+<pre
+  data-testid="meta"
+>
+  {"uuid":"uuid-3","dirty":true,"touched":true,"error":{"type":"custom","message":"Some other item is invalid"},"validations":[{"type":"custom","message":"Some other item is invalid"}],"defaultValue":"Joey Joe Joe Jr. Shabadoo"}
+</pre>
+`;
+
+exports[`PathFormField validations adds an error when custom validation returns false 1`] = `
+<pre
+  data-testid="meta"
+>
+  {"uuid":"uuid-3","dirty":true,"touched":true,"error":{"type":"custom","message":"Not a real name"},"validations":[{"type":"custom","message":"Not a real name"}],"defaultValue":"Joey Joe Joe Jr. Shabadoo"}
+</pre>
+`;

@@ -21,9 +21,17 @@ export const ExampleApp = () => {
     <PathFormProvider initialRenderValues={fetchedData}>
       <div style={{ display: 'flex', height: '100vh' }}>
         <div style={{ width: 800, padding: 25 }}>
+          <div style={{ marginBottom: 50 }}>
+            <h2>Validations</h2>
+            <ul>
+              <li>Must have a name</li>
+              <li>Name can't be 'Joe'</li>
+              <li>Age must be 21 or older</li>
+            </ul>
+          </div>
           <MyForm />
         </div>
-        <aside style={{ flex: 1, overflowY: 'scroll' }}>
+        <aside style={{ flex: 1, overflowY: 'scroll', padding: 25 }}>
           <PathFormDevTools />
         </aside>
       </div>
@@ -57,7 +65,10 @@ const MyForm = () => {
               <PathFormField
                 path={[...itemPath, 'name']}
                 defaultValue=""
-                validations={[{ type: 'required', message: 'Must give a name.' }]}
+                validations={[
+                  { type: 'required', message: 'Must give a name.' },
+                  { type: 'custom', message: "Name can't be Joe", value: (name) => name.trim().toLowerCase() !== 'joe' },
+                ]}
                 render={({ inputProps, meta, renders }) => {
                   return (
                     <>
