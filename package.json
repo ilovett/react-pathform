@@ -1,7 +1,7 @@
 {
   "name": "react-pathform",
   "description": "A react hooks library for recursive, nested, dynamic forms.",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "author": "Ian Lovett",
   "repository": "github:ilovett/react-pathform",
   "homepage": "https://github.com/ilovett/react-pathform",
