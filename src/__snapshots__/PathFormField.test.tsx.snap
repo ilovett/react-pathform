@@ -16,7 +16,39 @@ exports[`PathFormField base renders with the value from the store 2`] = `
 </pre>
 `;
 
-exports[`PathFormField validations adds an error when another value on the store is invalid 1`] = `
+exports[`PathFormField onChange validations adds an error when another value on the store is invalid 1`] = `
+<pre
+  data-testid="meta"
+>
+  {"uuid":"uuid-3","dirty":true,"touched":false,"error":{"type":"custom","message":"Some other item is invalid"},"validations":[{"type":"custom","message":"Some other item is invalid"}],"defaultValue":"Joey Joe Joe Jr. Shabadoo"}
+</pre>
+`;
+
+exports[`PathFormField onChange validations adds an error when custom validation returns false 1`] = `
+<pre
+  data-testid="meta"
+>
+  {"uuid":"uuid-3","dirty":true,"touched":false,"error":{"type":"custom","message":"Not a real name"},"validations":[{"type":"custom","message":"Not a real name"}],"defaultValue":"Joey Joe Joe Jr. Shabadoo"}
+</pre>
+`;
+
+exports[`PathFormField onChange validations clears the error when it's fixed 1`] = `
+<pre
+  data-testid="meta"
+>
+  {"uuid":"uuid-3","dirty":true,"touched":false,"error":{"type":"required","message":"Field is required"},"validations":[{"type":"required","message":"Field is required"}],"defaultValue":"Joey Joe Joe Jr. Shabadoo"}
+</pre>
+`;
+
+exports[`PathFormField onChange validations clears the error when it's fixed 2`] = `
+<pre
+  data-testid="meta"
+>
+  {"uuid":"uuid-3","dirty":true,"touched":false,"error":null,"validations":[{"type":"required","message":"Field is required"}],"defaultValue":"Joey Joe Joe Jr. Shabadoo"}
+</pre>
+`;
+
+exports[`PathFormField onSubmit validations adds an error when another value on the store is invalid 1`] = `
 <pre
   data-testid="meta"
 >
@@ -24,7 +56,7 @@ exports[`PathFormField validations adds an error when another value on the store
 </pre>
 `;
 
-exports[`PathFormField validations adds an error when custom validation returns false 1`] = `
+exports[`PathFormField onSubmit validations adds an error when custom validation returns false 1`] = `
 <pre
   data-testid="meta"
 >

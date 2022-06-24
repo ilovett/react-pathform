@@ -17,11 +17,14 @@ import { noDifference } from './utils';
 
 export type PathFormValuePrimitive = string | number | boolean | null;
 
+export type PathFormValidationMode = 'onSubmit' | 'onChange';
+
 export type PathFormState = {
   store: PathFormStore;
   dirtyUuids: string[];
   errors: PathFormStoreItemFlat[];
   defaultValues: any;
+  mode: PathFormValidationMode;
 };
 
 export type PathFormPath = Array<string | number>; // | string;
@@ -142,15 +145,18 @@ PathFormStateContext.displayName = 'PathFormStateContext';
 export interface PathFormProviderProps {
   initialRenderValues?: any; // TODO generics or something
   children: React.ReactNode;
+  mode?: PathFormValidationMode;
 }
 
-export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, initialRenderValues }) => {
+export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, initialRenderValues, mode = 'onSubmit' }) => {
   const state = React.useRef<PathFormState>({
     store: createStore(initialRenderValues),
     dirtyUuids: [],
     errors: [],
     defaultValues: initialRenderValues,
+    mode,
   });
+
   const watchers = React.useRef(eventEmitter());
 
   const getValues = () => {
@@ -191,7 +197,11 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
       throw new Error(`The target path "${dotpath}" does not exist.`);
     }
 
+    const canClearErrors = state.current.mode === 'onChange';
+
     if (storeItem.meta.validations) {
+      canClearErrors && storeItem.meta.error && clearError(path);
+
       storeItem.meta.validations.forEach((validation) => {
         // do nothing if the store item already has a validation error
         // TODO this may eventually get eliminated once a field can have multiple errors
@@ -301,6 +311,9 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
       }
 
       set(state.current.store, [...storePath, 'meta', 'dirty'], dirty);
+
+      // Validate field immediately on onChange mode
+      if (state.current.mode === 'onChange') validate(path);
 
       watchers.current.emit(toDotPath(path), value);
     }

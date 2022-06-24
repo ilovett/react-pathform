@@ -60,7 +60,7 @@ describe('PathFormField', () => {
     });
   });
 
-  describe('validations', () => {
+  describe('onSubmit validations', () => {
     it('adds an error when custom validation returns false', async () => {
       const { container } = render(
         <PathFormField
@@ -131,6 +131,122 @@ describe('PathFormField', () => {
 
       userEvent.click(getByTestId(container, 'submit'));
 
+      expect(getByTestId(container, 'meta')).toMatchSnapshot();
+    });
+  });
+
+  describe('onChange validations', () => {
+    const TestWrapperOnChange: React.FC = ({ children }) => {
+      return (
+        <PathFormProvider initialRenderValues={{ nested: { items: [{ name: 'Joey Joe Joe Jr. Shabadoo' }] } }} mode="onChange">
+          <PathForm onSubmit={() => null}>
+            {children}
+            <button type="submit" data-testid="submit">
+              Submit
+            </button>
+          </PathForm>
+        </PathFormProvider>
+      );
+    };
+
+    it('adds an error when custom validation returns false', async () => {
+      const { container } = render(
+        <PathFormField
+          path={['nested', 'items', 0, 'name']}
+          defaultValue="default"
+          validations={[
+            {
+              type: 'custom',
+              message: 'Not a real name',
+              value: (value: string) => {
+                // asdasdasd is not a real name, returns false if the name contains it
+                return value.indexOf('asdasdasd') === -1;
+              },
+            },
+          ]}
+          render={({ inputProps, meta, renders }) => {
+            return (
+              <div>
+                <label htmlFor="name">Name</label>
+                <input id="name" {...inputProps} />
+                <pre data-testid="meta">{JSON.stringify(meta)}</pre>
+                <pre data-testid="renders">{JSON.stringify(renders)}</pre>
+              </div>
+            );
+          }}
+        />,
+        { wrapper: TestWrapperOnChange }
+      );
+
+      userEvent.click(getByLabelText(container, 'Name'));
+      userEvent.type(getByLabelText(container, 'Name'), ' asdasdasd');
+
+      expect(getByTestId(container, 'meta')).toMatchSnapshot();
+    });
+
+    it('adds an error when another value on the store is invalid', async () => {
+      const { container } = render(
+        <PathFormField
+          path={['nested', 'items', 0, 'name']}
+          defaultValue="default"
+          validations={[
+            {
+              type: 'custom',
+              message: 'Some other item is invalid',
+              value: (_value, store) => {
+                return store.someToggle;
+              },
+            },
+          ]}
+          render={({ inputProps, meta, renders }) => {
+            return (
+              <div>
+                <label htmlFor="name">Name</label>
+                <input id="name" {...inputProps} />
+                <pre data-testid="meta">{JSON.stringify(meta)}</pre>
+                <pre data-testid="renders">{JSON.stringify(renders)}</pre>
+              </div>
+            );
+          }}
+        />,
+        { wrapper: TestWrapperOnChange }
+      );
+
+      userEvent.click(getByLabelText(container, 'Name'));
+      userEvent.type(getByLabelText(container, 'Name'), ' asdasdasd');
+
+      expect(getByTestId(container, 'meta')).toMatchSnapshot();
+    });
+
+    it("clears the error when it's fixed", async () => {
+      const { container } = render(
+        <PathFormField
+          path={['nested', 'items', 0, 'name']}
+          defaultValue="default"
+          validations={[{ type: 'required', message: 'Field is required' }]}
+          render={({ inputProps, meta, renders }) => {
+            return (
+              <div>
+                <label htmlFor="name">Name</label>
+                <input id="name" {...inputProps} />
+                <pre data-testid="meta">{JSON.stringify(meta)}</pre>
+                <pre data-testid="renders">{JSON.stringify(renders)}</pre>
+              </div>
+            );
+          }}
+        />,
+        { wrapper: TestWrapperOnChange }
+      );
+
+      userEvent.click(getByLabelText(container, 'Name'));
+      userEvent.clear(getByLabelText(container, 'Name'));
+
+      // Expect error
+      expect(getByTestId(container, 'meta')).toMatchSnapshot();
+
+      userEvent.type(getByLabelText(container, 'Name'), 'Joe');
+
+      // Expect no error
       expect(getByTestId(container, 'meta')).toMatchSnapshot();
     });
   });

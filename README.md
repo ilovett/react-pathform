@@ -88,6 +88,13 @@ The data in the store will remain until the `PathFormProvider` is unmounted.
 
 The initial data for your form on the *initial render only*.
 
+#### PathFormProvider `mode?: 'onSubmit' | 'onChange'`
+
+Set the mode in which the validation will happen.
+
+- onSubmit (default): will run the validation when the form is submitted.
+- onChange: Validation will trigger on the change event with each input, this may trigger multiple rerenders. The PathForm.onValidate will continue to be triggered on the submit event.
+
 <br/><br/>
 
 ### PathForm
