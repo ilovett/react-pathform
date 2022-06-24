@@ -79,21 +79,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
     if (validations) {
       setMeta(path, { validations });
     }
-
-    // unmounted the field at path
-    return () => {
-      // remove validations on the given path -- assuming 1 mount per path...
-      // consider multiple mounts to the same store value...
-      // since we're removing lets just not "remove" validations now
-      // since the whole store item is getting removed...
-      // TODO this should not throw errors
-      if (validations) {
-        // debugger;
-        // setMeta(path, { validations: null });
-      }
-    };
-    // eslint-disable-next-line
-  }, []);
+  }, [setMeta, validations]);
 
   return render({
     inputProps: {
