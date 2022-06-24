@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { PathFormProvider } from './usePathForm';
 import { PathFormField } from './PathFormField';
 import { PathForm } from './PathForm';
+import { PathFormValidation } from './usePathForm';
 
 const TestWrapper: React.FC = ({ children }) => {
   return (
@@ -57,6 +58,54 @@ describe('PathFormField', () => {
 
       // rendered 9 times due to typing 9 characters
       expect(getByTestId(container, 'renders')).toHaveTextContent('9');
+    });
+  });
+
+  describe('dynamic validation', () => {
+    it('the error should change when the validation is replaced', async () => {
+      const DynamicValidation = () => {
+        const [a, setA] = React.useState(false);
+
+        let validations: PathFormValidation[] = [{ type: 'required', message: 'required' }];
+        if (a) validations = [];
+
+        return (
+          <>
+            <PathFormField
+              path={['nested', 'items', 0, 'name']}
+              defaultValue="default"
+              validations={validations}
+              render={({ inputProps, meta, renders }) => {
+                return (
+                  <div>
+                    <label htmlFor="name">Name</label>
+                    <input id="name" {...inputProps} />
+                    <pre data-testid="meta">{JSON.stringify(meta)}</pre>
+                    <pre data-testid="renders">{JSON.stringify(renders)}</pre>
+                  </div>
+                );
+              }}
+            />
+            <button type="button" onClick={() => setA((value) => !value)} data-testid="toggle">
+              Toggle
+            </button>
+          </>
+        );
+      };
+
+      const { container } = render(<DynamicValidation />, { wrapper: TestWrapper });
+
+      userEvent.clear(getByLabelText(container, 'Name'));
+      userEvent.click(getByTestId(container, 'submit'));
+
+      // Should have an error
+      expect(getByTestId(container, 'meta')).toMatchSnapshot();
+
+      userEvent.click(getByTestId(container, 'toggle'));
+      userEvent.click(getByTestId(container, 'submit'));
+
+      // Should have no error since there's no validation anymore
+      expect(getByTestId(container, 'meta')).toMatchSnapshot();
     });
   });
 
