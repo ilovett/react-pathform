@@ -27,18 +27,8 @@ const fetchedData = {
 export const ExampleApp = () => {
   const [mode, setMode] = React.useState<PathFormValidationMode>('onSubmit');
 
-  // This will force the form to be removed and added back to the tree, this way it's possible to change the mode
-  const [showForm, setShowForm] = React.useState(true);
-  React.useEffect(() => {
-    if (!showForm) {
-      const timeout = setTimeout(() => setShowForm(true), 100);
-      return () => clearTimeout(timeout);
-    }
-  }, [showForm]);
-
   const onChangeMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setMode(e.target.value as PathFormValidationMode);
-    setShowForm(false);
   };
 
   return (
@@ -55,26 +45,24 @@ export const ExampleApp = () => {
           </select>
         </label>
       </div>
-      {showForm && (
-        <PathFormProvider initialRenderValues={fetchedData} mode={mode}>
-          <div style={{ display: 'flex', flexGrow: 1, height: '100%' }}>
-            <div style={{ width: 800, padding: 25 }}>
-              <div style={{ marginBottom: 50 }}>
-                <h2>Validations</h2>
-                <ul>
-                  <li>Must have a name</li>
-                  <li>Name can't be 'Joe'</li>
-                  <li>Age must be 21 or older</li>
-                </ul>
-              </div>
-              <MyForm />
+      <PathFormProvider initialRenderValues={fetchedData} mode={mode} key={mode}>
+        <div style={{ display: 'flex', flexGrow: 1, height: '100%' }}>
+          <div style={{ width: 800, padding: 25 }}>
+            <div style={{ marginBottom: 50 }}>
+              <h2>Validations</h2>
+              <ul>
+                <li>Must have a name</li>
+                <li>Name can't be 'Joe'</li>
+                <li>Age must be 21 or older</li>
+              </ul>
             </div>
-            <aside style={{ flex: 1, overflowY: 'scroll' }}>
-              <PathFormDevTools />
-            </aside>
+            <MyForm />
           </div>
-        </PathFormProvider>
-      )}
+          <aside style={{ flex: 1, overflowY: 'scroll' }}>
+            <PathFormDevTools />
+          </aside>
+        </div>
+      </PathFormProvider>
     </div>
   );
 };

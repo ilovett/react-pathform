@@ -35,7 +35,7 @@ export interface PathFormFieldProps {
 export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defaultValue, validations, publish }) => {
   const name = usePathFormDotPath(path);
   const [value, meta, renders] = usePathFormValue(path, defaultValue); // TODO defaultValue needed?
-  const { setValue, setMeta, clearError, watchers, state } = usePathForm();
+  const { setValue, setMeta, clearError, watchers, state, validate } = usePathForm();
 
   const onChange = React.useCallback(
     (event: any) => {
@@ -78,8 +78,9 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
     // TODO handle multiple fields for same path
     if (validations) {
       setMeta(path, { validations });
+      if (state.current.mode === 'onChange') validate(path);
     }
-  }, [setMeta, validations]);
+  }, [setMeta, validations, validate, state.current.mode]);
 
   return render({
     inputProps: {
