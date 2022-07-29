@@ -1,0 +1,298 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`array append adds items to the end of an array 1`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array append adds items to the end of an array 2`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+      Object {
+        "name": "LAST",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array insert inserts items into an array at a given index 1`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array insert inserts items into an array at a given index 2`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "AA",
+      },
+      Object {
+        "name": "AB",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array move moves items in an array from an index to another index 1`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array move moves items in an array from an index to another index 2`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+      Object {
+        "name": "A",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array prepend prepends an item to the beginning of an array 1`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array prepend prepends an item to the beginning of an array 2`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "FIRST",
+      },
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array remove removes items from an array as expected 1`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array remove removes items from an array as expected 2`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array remove removes one item from an array by default 1`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array remove removes one item from an array by default 2`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array splice splices as expected 1`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`array splice splices as expected 2`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "BB",
+      },
+      Object {
+        "name": "CC",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;

@@ -1,0 +1,6 @@
+/*
+!dist
+!src
+**/*.test.tsx
+**/*.test.ts
+**/*.snap

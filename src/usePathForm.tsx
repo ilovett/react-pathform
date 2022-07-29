@@ -121,10 +121,86 @@ type PathFormStateContext = {
 };
 
 export type PathFormArrayUtils = {
+  /**
+   * Append an `item` to the end of a collection at the given `path`.
+   *
+   * @example
+   * array.append([...path], 'last')
+   *
+   * @param path The path to the collection in the store.
+   * @param item New item to append.
+   */
   append: (path: PathFormPath, item: any) => any;
-  prepend: (path: PathFormPath, item: any) => any;
-  remove: (path: PathFormPath, index: number) => any;
+
+  /**
+   * Insert `items` into a collection at the given `path` / `index`.
+   *
+   * @example
+   * array.insert([...path], 4, 'new-1')
+   *
+   * @example
+   * array.insert([...path], 4, 'new-1', 'new-2', 'new-3')
+   *
+   * @param path The path to the collection in the store.
+   * @param index The index at which to insert the new items at the given path.
+   * @param items New items to insert.
+   */
+  insert: (path: PathFormPath, index: number, ...items: any[]) => any;
+
+  /**
+   * Move an item in a collection at the given `path` from the
+   * `fromIndex` to the `toIndex`.
+   *
+   * @example
+   * array.move([...path], 1, 4)
+   *
+   * @param path The path to the collection in the store.
+   * @param fromIndex The index to move the item from.
+   * @param toIndex The index to move the item to.
+   */
   move: (path: PathFormPath, fromIndex: number, toIndex: number) => any;
+
+  /**
+   * Prepend an `item` to the beginning of a collection at the given `path`.
+   *
+   * @example
+   * array.prepend([...path], 'first')
+   *
+   * @param path The path to the collection in the store.
+   * @param item New item to prepend.
+   */
+  prepend: (path: PathFormPath, item: any) => any;
+
+  /**
+   * Splice the array at the given `path`.
+   *
+   * @example
+   * // replace 2 items at index 5
+   * array.splice([...path], 5, 2, 'replace-1', 'replace-2')
+   *
+   * @param path The path to the collection in the store.
+   * @param index The index the splice at.
+   * @param deleteCount The number of items to remove.  Defaults to 0.
+   * @param items New items to insert.
+   */
+  splice: (path: PathFormPath, index: number, deleteCount: number, ...items: any) => any;
+
+  /**
+   * Remove one or more items from a collection at the given `path` / `index`.
+   * Remove N items by passing `deleteCount`, which defaults to 1.
+   *
+   * @example
+   * // remove item at index 3
+   * array.remove([...path], 3)
+   *
+   * @example
+   * // remove 5 items starting at index 2
+   * array.remove([...path], 2, 5)
+   *
+   * @param path The path to the collection in the store.
+   * @param item New item to prepend.
+   */
+  remove: (path: PathFormPath, index: number, deleteCount?: number) => any;
 };
 
 export interface PathFormPublishOptions {
@@ -493,6 +569,12 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
       });
     },
 
+    insert: (path: PathFormPath, index: number, ...items: any) => {
+      mutateArray(path, (targetArrayStoreItem: PathFormStoreArray) => {
+        targetArrayStoreItem.value.splice(index, 0, ...items.map(createStoreItem));
+      });
+    },
+
     prepend: (path: PathFormPath, item: any) => {
       mutateArray(path, (targetArrayStoreItem: PathFormStoreArray) => {
         // unshift the new store item to the beginning of the array
@@ -507,10 +589,16 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
       });
     },
 
-    remove: (path: PathFormPath, index: number) => {
+    remove: (path: PathFormPath, index: number, deleteCount?: number) => {
       mutateArray(path, (targetArrayStoreItem: PathFormStoreArray) => {
         // mutate the target array
-        arrayRemove(targetArrayStoreItem.value, index);
+        arrayRemove(targetArrayStoreItem.value, index, deleteCount);
+      });
+    },
+
+    splice: (path: PathFormPath, index: number, deleteCount: number = 0, ...items: any) => {
+      mutateArray(path, (targetArrayStoreItem: PathFormStoreArray) => {
+        targetArrayStoreItem.value.splice(index, deleteCount, ...items.map(createStoreItem));
       });
     },
   };

@@ -24,10 +24,6 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "module": "dist/react-pathform.esm.js",
-  "files": [
-    "dist",
-    "src"
-  ],
   "engines": {
     "node": ">=10"
   },

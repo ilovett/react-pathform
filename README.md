@@ -265,12 +265,12 @@ Appends an `item` to the end of the array at given `path`.
 array.append(["deeply", "nested", "items"], { "name": "Santa's Little Helper" });
 ```
 
-##### `prepend function(path: PathFormPath, item: any)`
+##### `insert function(path: PathFormPath, index: number, ...items: any[])`
 
-Prepends an `item` to the beginning of the array at given `path`.
+Insert `items` into a collection at the given `path` / `index`.
 
 ```tsx
-array.prepend(["deeply", "nested", "items"], { "name": "Santa's Little Helper" });
+array.insert(["deeply", "nested", "items"], 3, { "name": "Santa's Little Helper" });
 ```
 
 ##### `move function(path: PathFormPath, fromIndex: number, toIndex: number)`
@@ -281,12 +281,33 @@ Moves an `item` in the array at given `path`, from the `fromIndex` to the `toInd
 array.move(["deeply", "nested", "items"], 3, 4);
 ```
 
-##### `remove function(path: PathFormPath, index: number)`
+##### `prepend function(path: PathFormPath, item: any)`
 
-Removes an `item` from the array at given `path` at `index`.
+Prepends an `item` to the beginning of the array at given `path`.
 
 ```tsx
+array.prepend(["deeply", "nested", "items"], { "name": "Santa's Little Helper" });
+```
+
+##### `remove function(path: PathFormPath, index: number, deleteCount: number = 1)`
+
+Removes items from the array at given `path` at `index`.  Removes `1` item by default.
+
+```tsx
+// remove one item at index 2
 array.remove(["deeply", "nested", "items"], 2);
+
+// remove three items starting at index 2
+array.remove(["deeply", "nested", "items"], 2, 3);
+```
+
+##### `splice function(path: PathFormPath, index: number, deleteCount: number = 0, ...items: any[])`
+
+Splice the array at given `path` / `index`.
+
+```tsx
+// replace 2 items starting at index 6
+array.splice(["deeply", "nested", "items"], 6, 2, 'replaced-1', 'replaced-2');
 ```
 
 <br/><br/>

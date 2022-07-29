@@ -211,10 +211,11 @@ export const arrayMove = (arr: any[], fromIndex: number, toIndex: number): void 
  *
  * @param arr the array to mutate
  * @param index the element index to remove
+ * @param [deleteCount=1] the number of items to delete. Default is 1.
  * @todo performance improvements
  */
-export const arrayRemove = (arr: any[], index: number): void => {
-  arr.splice(index, 1);
+export const arrayRemove = (arr: any[], index: number, deleteCount: number = 1): void => {
+  arr.splice(index, deleteCount);
 };
 
 export const createStoreItemMeta = (defaultValue?: any): PathFormStoreMeta => {
