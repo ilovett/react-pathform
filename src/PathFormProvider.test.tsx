@@ -1,26 +1,22 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { PathFormProvider, usePathForm } from '.';
 
-function wrapper({ children }: { children: React.ReactChildren }) {
-  return (
-    <PathFormProvider
-      initialRenderValues={{
-        nested: {
-          items: [{ name: 'A' }, { name: 'B' }, { name: 'C' }, { name: 'D' }],
-        },
-      }}
-    >
-      {children}
-    </PathFormProvider>
-  );
+const defaultInitialRenderValues = {
+  nested: {
+    items: [{ name: 'A' }, { name: 'B' }, { name: 'C' }, { name: 'D' }],
+  },
+};
+
+function Wrapper({ children, initialRenderValues = defaultInitialRenderValues }: { children?: ReactNode; initialRenderValues?: any }) {
+  return <PathFormProvider initialRenderValues={initialRenderValues}>{children}</PathFormProvider>;
 }
 
-describe('array', () => {
-  function render() {
-    return renderHook(() => usePathForm(), { wrapper });
-  }
+function render(initialRenderValues?: any) {
+  return renderHook(() => usePathForm(), { wrapper: (props) => <Wrapper {...props} initialRenderValues={initialRenderValues} /> });
+}
 
+describe('PathFormProvider', () => {
   describe('append', () => {
     it('adds items to the end of an array', () => {
       const { result } = render();
@@ -100,6 +96,58 @@ describe('array', () => {
       result.current.array.remove(['nested', 'items'], 1);
 
       expect(result.current.getValues()).toMatchSnapshot();
+    });
+  });
+
+  describe('initialRenderValues', () => {
+    it('can be an object', () => {
+      const { result } = render();
+      expect(result.current.getValues()).toMatchInlineSnapshot(`
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`);
+    });
+
+    it('can be an array', () => {
+      const { result } = render([1, 2, 3]);
+      expect(result.current.getValues()).toMatchInlineSnapshot(`
+Array [
+  1,
+  2,
+  3,
+]
+`);
+    });
+
+    it('can be a primitive', () => {
+      const { result } = render(null);
+      expect(result.current.getValues()).toMatchInlineSnapshot(`null`);
+    });
+
+    it('can be a primitive `number`', () => {
+      const { result } = render(123);
+      expect(result.current.getValues()).toMatchInlineSnapshot(`123`);
+    });
+
+    it('can be a primitive `string`', () => {
+      const { result } = render('Hello World!');
+      expect(result.current.getValues()).toMatchInlineSnapshot(`"Hello World!"`);
     });
   });
 });

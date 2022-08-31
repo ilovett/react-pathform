@@ -1,0 +1,44 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createStoreItemObject works as expected 1`] = `
+Object {
+  "meta": Object {
+    "defaultValue": Object {
+      "one": 1,
+      "two": 2,
+    },
+    "dirty": false,
+    "error": null,
+    "touched": false,
+    "uuid": "uuid-3",
+    "validations": null,
+  },
+  "type": "object",
+  "value": Object {
+    "one": Object {
+      "meta": Object {
+        "defaultValue": 1,
+        "dirty": false,
+        "error": null,
+        "touched": false,
+        "uuid": "uuid-1",
+        "validations": null,
+      },
+      "type": "primitive",
+      "value": 1,
+    },
+    "two": Object {
+      "meta": Object {
+        "defaultValue": 2,
+        "dirty": false,
+        "error": null,
+        "touched": false,
+        "uuid": "uuid-2",
+        "validations": null,
+      },
+      "type": "primitive",
+      "value": 2,
+    },
+  },
+}
+`;

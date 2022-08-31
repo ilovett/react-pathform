@@ -1,19 +1,19 @@
 import {
   PathFormPath,
-  PathFormStore,
   PathFormStoreArray,
   PathFormStoreInput,
   PathFormStoreItem,
+  PathFormStoreItemFlat,
   PathFormStoreMeta,
   PathFormStoreObject,
   PathFormStorePrimitive,
   PathFormValuePrimitive,
   PathFormValueType,
-} from './usePathForm';
+} from '.';
 import { uuidv4 } from './uuidv4';
 import { getValue, mapValues, setValue } from './utils';
 
-export const get = (store: PathFormStore, storePath: PathFormPath, defaultValue?: any) => {
+export const get = (store: PathFormStoreItem, storePath: PathFormPath, defaultValue?: any) => {
   return getValue(store, storePath, defaultValue);
 };
 
@@ -22,7 +22,7 @@ type PathFormSetStoreOptions = {
 };
 
 // TODO eventually this should recursively start from the root and update recursively
-export const set = (store: PathFormStore, storePath: PathFormPath, value: any, options?: PathFormSetStoreOptions) => {
+export const set = (store: PathFormStoreItem, storePath: PathFormPath, value: any, options?: PathFormSetStoreOptions) => {
   const result = setValue(store, storePath, value);
 
   // ensure types and meta are set on parent paths
@@ -41,7 +41,7 @@ export const set = (store: PathFormStore, storePath: PathFormPath, value: any, o
  * @param store
  * @param storePath
  */
-export const validateNewStorePath = (store: PathFormStore, storePath: PathFormPath) => {
+export const validateNewStorePath = (store: PathFormStoreItem, storePath: PathFormPath) => {
   const storeItem = get(store, storePath);
 
   // assign the type if missing and create meta
@@ -177,17 +177,27 @@ export const fromDotPath = (dotpath: string): PathFormPath => {
  * @param array An array of strings or numbers of nested objects and arrays.
  */
 export const toStorePath = (path: PathFormPath): PathFormPath => {
-  return path.reduce((memo, current, index, arr) => {
-    memo.push(current);
+  // for root store item return nothing
+  if (path.length === 0) {
+    return [];
+  }
 
-    // dont access the target items value,
-    // we want the store item itself (the parent of the value)
-    if (index + 1 < arr.length) {
-      memo.push('value');
-    }
+  return path.reduce(
+    (memo, current, index, arr) => {
+      memo.push(current);
 
-    return memo;
-  }, [] as PathFormPath);
+      // dont access the target items value,
+      // we want the store item itself (the parent of the value)
+      if (index + 1 < arr.length) {
+        memo.push('value');
+      }
+
+      return memo;
+    },
+
+    // start with root storeItem value
+    ['value'] as PathFormPath
+  );
 };
 
 /** arrayMove
@@ -237,8 +247,8 @@ export const createStoreItemPrimitive = (item: any): PathFormStorePrimitive => {
   };
 };
 
-export const createStoreItemArray = (item: any[]): PathFormStoreArray => {
-  const value = item.map((i) => createStoreItem(i));
+export const createStoreItemArray = (item: any[], { recursive = true }: { recursive?: boolean } = {}): PathFormStoreArray => {
+  const value = recursive ? item.map((i) => createStoreItem(i, { recursive })) : item;
   const defaultFieldUuids = value.map((i) => i.meta.uuid);
 
   return {
@@ -248,27 +258,53 @@ export const createStoreItemArray = (item: any[]): PathFormStoreArray => {
   };
 };
 
-export const createStoreItemObject = (item: any): PathFormStoreObject => {
+export const createStoreItemObject = (item: any, { recursive = true }: { recursive?: boolean } = {}): PathFormStoreObject => {
+  const value = recursive ? mapValues(item, (i) => createStoreItem(i, { recursive })) : item;
+
   return {
     type: 'object',
     meta: createStoreItemMeta(item),
-    value: mapValues(item, createStoreItem),
+    value,
   };
 };
 
-export const createStoreItem = (item: any): PathFormStoreItem => {
+export const createStoreItem = (item: any, { recursive = true }: { recursive?: boolean } = {}): PathFormStoreItem => {
   if (Array.isArray(item)) {
-    return createStoreItemArray(item);
+    return createStoreItemArray(item, { recursive });
   } else if (Object(item) === item) {
-    return createStoreItemObject(item);
+    return createStoreItemObject(item, { recursive });
   } else {
     return createStoreItemPrimitive(item);
   }
 };
 
-export const createStore = (input: PathFormStoreInput): PathFormStore => {
-  return mapValues(input, createStoreItem);
-};
+// // TODO optional iterator or maxDepth ?
+// export const createStore = (input: PathFormStoreInput): PathFormStoreItem => {
+
+//   // TODO why the fuck am i mapValues on object/array ???
+//   // cant I not just pass `createStoreItem(input` ?)
+//   const result = mapValues(input, (i) => createStoreItem(i));
+//   debugger;
+//   const root = createStoreItem(result);
+//   debugger;
+//   // avoid recursion at the room
+//   if (Array.isArray(result)) {
+//     // TODO
+//     return createStoreItemArray(result, { convertValue: false });
+//     // return createStoreItemArray(result);
+//   } else if (Object(result) === result) {
+//     // avoid
+//     return {
+//       type: 'object',
+//       meta: createStoreItemMeta(result),
+//       value: result,
+//     };
+//   } else {
+//     return createStoreresultPrimitive(result);
+//   }
+
+//   return root;
+// };
 
 export const parseStoreItemPrimitive = (item: PathFormStorePrimitive): PathFormValuePrimitive => {
   return item.value;
@@ -295,66 +331,63 @@ export const parseStoreItem = (item: PathFormStoreItem): any => {
   }
 };
 
-export const parseStore = (store: PathFormStore): object => {
-  return mapValues(store, (i) => parseStoreItem(i));
-};
+// TODO redundant?
+// export const parseStore = (store: PathFormStore): object => {
+//   return mapValues(store, (i) => parseStoreItem(i));
+// };
 
-export type PathFormStoreItemFlat = {
-  dotpath: string;
-  path: PathFormPath;
-  storeItem: PathFormStoreItem;
-};
+// /**
+//  * Creates a flat collection of every store item associated
+//  * with a `path` and `dotpath` which can be iterated over.
+//  *
+//  * @param store
+//  * @returns
+//  */
+// export const flattenStore = (store: PathFormStore) => {
+//   const flattened: Array<PathFormStoreItemFlat> = [];
 
-/**
- * Creates a flat collection of every store item associated
- * with a `path` and `dotpath` which can be iterated over.
- *
- * @param store
- * @returns
- */
-export const flattenStore = (store: PathFormStore) => {
-  const flattened: Array<PathFormStoreItemFlat> = [];
+//   Object.keys(store).forEach((key) => {
+//     const storeItem = store[key];
+//     const basePath = [key];
+//     flattenStoreItem(flattened, basePath, storeItem);
+//   });
 
-  Object.keys(store).forEach((key) => {
-    const storeItem = store[key];
-    const basePath = [key];
-    flattenStoreItem(flattened, basePath, storeItem);
-  });
+//   return flattened;
+// };
+
+export const flattenStoreItem = (storeItem: PathFormStoreItem, path: PathFormPath = [], flattened: Array<PathFormStoreItemFlat> = []) => {
+  if (storeItem.type === 'array') {
+    flattenStoreItemArray(storeItem, path, flattened);
+  } else if (storeItem.type === 'object') {
+    flattenStoreItemObject(storeItem, path, flattened);
+  } else {
+    flattenStoreItemPrimitive(storeItem, path, flattened);
+  }
 
   return flattened;
 };
 
-export const flattenStoreItem = (flattened: Array<PathFormStoreItemFlat>, basePath: PathFormPath, storeItem: PathFormStoreItem) => {
-  if (storeItem.type === 'array') {
-    flattenStoreItemArray(flattened, basePath, storeItem);
-  } else if (storeItem.type === 'object') {
-    flattenStoreItemObject(flattened, basePath, storeItem);
-  } else {
-    flattenStoreItemPrimitive(flattened, basePath, storeItem);
-  }
-};
-
-export const flattenStoreItemArray = (flattened: Array<PathFormStoreItemFlat>, basePath: PathFormPath, storeItem: PathFormStoreArray) => {
-  flattened.push({ dotpath: toDotPath(basePath), path: basePath, storeItem });
+export const flattenStoreItemArray = (storeItem: PathFormStoreArray, path: PathFormPath, flattened: Array<PathFormStoreItemFlat>) => {
+  flattened.push({ dotpath: toDotPath(path), path: path, storeItem });
 
   storeItem.value.forEach((childItem, index) => {
-    flattenStoreItem(flattened, [...basePath, index], childItem);
+    flattenStoreItem(childItem, [...path, index], flattened);
   });
 };
 
 export const flattenStoreItemPrimitive = (
-  flattened: Array<PathFormStoreItemFlat>,
-  basePath: PathFormPath,
-  storeItem: PathFormStorePrimitive
+  storeItem: PathFormStorePrimitive,
+  path: PathFormPath,
+  flattened: Array<PathFormStoreItemFlat>
 ) => {
-  flattened.push({ dotpath: toDotPath(basePath), path: basePath, storeItem });
+  flattened.push({ dotpath: toDotPath(path), path, storeItem });
 };
 
-export const flattenStoreItemObject = (flattened: Array<PathFormStoreItemFlat>, basePath: PathFormPath, storeItem: PathFormStoreObject) => {
-  flattened.push({ dotpath: toDotPath(basePath), path: basePath, storeItem });
+export const flattenStoreItemObject = (storeItem: PathFormStoreObject, path: PathFormPath, flattened: Array<PathFormStoreItemFlat>) => {
+  flattened.push({ dotpath: toDotPath(path), path: path, storeItem });
 
   Object.keys(storeItem.value).forEach((key) => {
     const childStoreItem = storeItem.value[key];
-    flattenStoreItem(flattened, [...basePath, key], childStoreItem);
+    flattenStoreItem(childStoreItem, [...path, key], flattened);
   });
 };

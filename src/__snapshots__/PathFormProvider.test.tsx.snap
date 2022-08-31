@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`array append adds items to the end of an array 1`] = `
+exports[`PathFormProvider append adds items to the end of an array 1`] = `
 Object {
   "nested": Object {
     "items": Array [
@@ -21,7 +21,7 @@ Object {
 }
 `;
 
-exports[`array append adds items to the end of an array 2`] = `
+exports[`PathFormProvider append adds items to the end of an array 2`] = `
 Object {
   "nested": Object {
     "items": Array [
@@ -45,7 +45,7 @@ Object {
 }
 `;
 
-exports[`array insert inserts items into an array at a given index 1`] = `
+exports[`PathFormProvider insert inserts items into an array at a given index 1`] = `
 Object {
   "nested": Object {
     "items": Array [
@@ -66,7 +66,7 @@ Object {
 }
 `;
 
-exports[`array insert inserts items into an array at a given index 2`] = `
+exports[`PathFormProvider insert inserts items into an array at a given index 2`] = `
 Object {
   "nested": Object {
     "items": Array [
@@ -93,7 +93,7 @@ Object {
 }
 `;
 
-exports[`array move moves items in an array from an index to another index 1`] = `
+exports[`PathFormProvider move moves items in an array from an index to another index 1`] = `
 Object {
   "nested": Object {
     "items": Array [
@@ -114,7 +114,7 @@ Object {
 }
 `;
 
-exports[`array move moves items in an array from an index to another index 2`] = `
+exports[`PathFormProvider move moves items in an array from an index to another index 2`] = `
 Object {
   "nested": Object {
     "items": Array [
@@ -135,7 +135,7 @@ Object {
 }
 `;
 
-exports[`array prepend prepends an item to the beginning of an array 1`] = `
+exports[`PathFormProvider prepend prepends an item to the beginning of an array 1`] = `
 Object {
   "nested": Object {
     "items": Array [
@@ -156,7 +156,7 @@ Object {
 }
 `;
 
-exports[`array prepend prepends an item to the beginning of an array 2`] = `
+exports[`PathFormProvider prepend prepends an item to the beginning of an array 2`] = `
 Object {
   "nested": Object {
     "items": Array [
@@ -180,7 +180,7 @@ Object {
 }
 `;
 
-exports[`array remove removes items from an array as expected 1`] = `
+exports[`PathFormProvider remove removes items from an array as expected 1`] = `
 Object {
   "nested": Object {
     "items": Array [
@@ -201,7 +201,7 @@ Object {
 }
 `;
 
-exports[`array remove removes items from an array as expected 2`] = `
+exports[`PathFormProvider remove removes items from an array as expected 2`] = `
 Object {
   "nested": Object {
     "items": Array [
@@ -216,46 +216,7 @@ Object {
 }
 `;
 
-exports[`array remove removes one item from an array by default 1`] = `
-Object {
-  "nested": Object {
-    "items": Array [
-      Object {
-        "name": "A",
-      },
-      Object {
-        "name": "B",
-      },
-      Object {
-        "name": "C",
-      },
-      Object {
-        "name": "D",
-      },
-    ],
-  },
-}
-`;
-
-exports[`array remove removes one item from an array by default 2`] = `
-Object {
-  "nested": Object {
-    "items": Array [
-      Object {
-        "name": "A",
-      },
-      Object {
-        "name": "C",
-      },
-      Object {
-        "name": "D",
-      },
-    ],
-  },
-}
-`;
-
-exports[`array splice splices as expected 1`] = `
+exports[`PathFormProvider remove removes one item from an array by default 1`] = `
 Object {
   "nested": Object {
     "items": Array [
@@ -276,7 +237,46 @@ Object {
 }
 `;
 
-exports[`array splice splices as expected 2`] = `
+exports[`PathFormProvider remove removes one item from an array by default 2`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`PathFormProvider splice splices as expected 1`] = `
+Object {
+  "nested": Object {
+    "items": Array [
+      Object {
+        "name": "A",
+      },
+      Object {
+        "name": "B",
+      },
+      Object {
+        "name": "C",
+      },
+      Object {
+        "name": "D",
+      },
+    ],
+  },
+}
+`;
+
+exports[`PathFormProvider splice splices as expected 2`] = `
 Object {
   "nested": Object {
     "items": Array [

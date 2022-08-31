@@ -1,6 +1,5 @@
 import { useDebugValue, useMemo } from 'react';
-import { usePathForm } from './usePathForm';
-import { usePathFormSubscription } from './usePathFormSubscription';
+import { usePathForm, usePathFormSubscription } from '.';
 
 export const usePathFormErrors = () => {
   const renders = usePathFormSubscription('errors');

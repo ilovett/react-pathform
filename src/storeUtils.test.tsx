@@ -1,5 +1,4 @@
 import {
-  createStore,
   createStoreItemObject,
   createStoreItemArray,
   createStoreItemPrimitive,
@@ -8,7 +7,7 @@ import {
   parseStoreItemArray,
   parseStoreItemPrimitive,
   fromDotPath,
-  flattenStore,
+  flattenStoreItem,
   set,
   createStoreItem,
 } from './storeUtils';
@@ -26,14 +25,22 @@ const createMetaHelper = (uuid: string, defaultValue: any) => {
 
 describe('set', () => {
   it('doesnt validate parent paths unless explicitly defined', () => {
-    const fakeStore = {};
-    const storeItem = createStoreItem('Hello World');
+    const rootStoreItem = createStoreItem({});
+    const insertStoreItem = createStoreItem('Hello World');
 
-    set(fakeStore, ['rootItem', 'value', 'parentObject', 'value', 'primitiveLeaf', 'value'], storeItem);
+    set(rootStoreItem, ['rootItem', 'value', 'parentObject', 'value', 'primitiveLeaf', 'value'], insertStoreItem);
 
     // note that `type` and `meta` are missing on parent items
-    expect(fakeStore).toMatchInlineSnapshot(`
+    expect(rootStoreItem).toMatchInlineSnapshot(`
       Object {
+        "meta": Object {
+          "defaultValue": Object {},
+          "dirty": false,
+          "error": null,
+          "touched": false,
+          "uuid": "uuid-1",
+          "validations": null,
+        },
         "rootItem": Object {
           "value": Object {
             "parentObject": Object {
@@ -45,7 +52,7 @@ describe('set', () => {
                       "dirty": false,
                       "error": null,
                       "touched": false,
-                      "uuid": "uuid-1",
+                      "uuid": "uuid-2",
                       "validations": null,
                     },
                     "type": "primitive",
@@ -56,19 +63,29 @@ describe('set', () => {
             },
           },
         },
+        "type": "object",
+        "value": Object {},
       }
     `);
   });
 
   it('validates parent paths when setting deep leaf nodes', () => {
-    const fakeStore = {};
+    const fakeStoreItem = createStoreItem({});
     const storeItem = createStoreItem('Hello World');
 
-    set(fakeStore, ['rootItem', 'value', 'parentObject', 'value', 'primitiveLeaf', 'value'], storeItem, { validateParentPath: true });
+    set(fakeStoreItem, ['rootItem', 'value', 'parentObject', 'value', 'primitiveLeaf', 'value'], storeItem, { validateParentPath: true });
 
     // expect that rootItem, parentObject have type/meta assigned
-    expect(fakeStore).toMatchInlineSnapshot(`
+    expect(fakeStoreItem).toMatchInlineSnapshot(`
       Object {
+        "meta": Object {
+          "defaultValue": Object {},
+          "dirty": false,
+          "error": null,
+          "touched": false,
+          "uuid": "uuid-1",
+          "validations": null,
+        },
         "rootItem": Object {
           "value": Object {
             "meta": Object {
@@ -76,7 +93,7 @@ describe('set', () => {
               "dirty": false,
               "error": null,
               "touched": false,
-              "uuid": "uuid-3",
+              "uuid": "uuid-4",
               "validations": null,
             },
             "parentObject": Object {
@@ -86,7 +103,7 @@ describe('set', () => {
                   "dirty": false,
                   "error": null,
                   "touched": false,
-                  "uuid": "uuid-2",
+                  "uuid": "uuid-3",
                   "validations": null,
                 },
                 "primitiveLeaf": Object {
@@ -96,7 +113,7 @@ describe('set', () => {
                       "dirty": false,
                       "error": null,
                       "touched": false,
-                      "uuid": "uuid-1",
+                      "uuid": "uuid-2",
                       "validations": null,
                     },
                     "type": "primitive",
@@ -109,6 +126,8 @@ describe('set', () => {
             "type": "primitive",
           },
         },
+        "type": "object",
+        "value": Object {},
       }
     `);
   });
@@ -116,14 +135,14 @@ describe('set', () => {
 
 describe('toStorePath', () => {
   it('works as expected', () => {
-    expect(toStorePath(['set'])).toEqual(['set']);
-    expect(toStorePath(['set', 0])).toEqual(['set', 'value', 0]);
-    expect(toStorePath(['set', 0, 'obj'])).toEqual(['set', 'value', 0, 'value', 'obj']);
-    expect(toStorePath(['set', 0, 'obj', 'name'])).toEqual(['set', 'value', 0, 'value', 'obj', 'value', 'name']);
+    expect(toStorePath(['set'])).toEqual(['value', 'set']);
+    expect(toStorePath(['set', 0])).toEqual(['value', 'set', 'value', 0]);
+    expect(toStorePath(['set', 0, 'obj'])).toEqual(['value', 'set', 'value', 0, 'value', 'obj']);
+    expect(toStorePath(['set', 0, 'obj', 'name'])).toEqual(['value', 'set', 'value', 0, 'value', 'obj', 'value', 'name']);
 
     // string integers `'0'` converted to object paths
     // prettier-ignore
-    expect(toStorePath(['set', '0', 'obj', 'name'])).toEqual(['set', 'value', '0', 'value', 'obj', 'value', 'name']);
+    expect(toStorePath(['set', '0', 'obj', 'name'])).toEqual(['value', 'set', 'value', '0', 'value', 'obj', 'value', 'name']);
   });
 });
 
@@ -161,37 +180,7 @@ describe('createStoreItemObject', () => {
         one: 1,
         two: 2,
       })
-    ).toMatchObject({
-      type: 'object',
-      meta: {
-        uuid: 'uuid-1',
-        dirty: false,
-        touched: false,
-        error: null,
-      },
-      value: {
-        one: {
-          type: 'primitive',
-          meta: {
-            uuid: 'uuid-2',
-            dirty: false,
-            touched: false,
-            error: null,
-          },
-          value: 1,
-        },
-        two: {
-          type: 'primitive',
-          meta: {
-            uuid: 'uuid-3',
-            dirty: false,
-            touched: false,
-            error: null,
-          },
-          value: 2,
-        },
-      },
-    });
+    ).toMatchSnapshot();
   });
 });
 
@@ -260,34 +249,37 @@ describe('createStoreItemArray', () => {
   });
 });
 
-describe('createStore', () => {
+describe('createStoreItem', () => {
   it('works as expected', () => {
     expect(
-      createStore({
+      createStoreItem({
         name: 'Special Orders TODO',
         items: [1, 2],
       })
     ).toMatchObject({
-      name: {
-        type: 'primitive',
-        meta: createMetaHelper('uuid-1', 'Special Orders TODO'),
-        value: 'Special Orders TODO',
-      },
-      items: {
-        type: 'array',
-        meta: { ...createMetaHelper('uuid-4', [1, 2]), defaultFieldUuids: ['uuid-2', 'uuid-3'] },
-        value: [
-          {
-            type: 'primitive',
-            meta: createMetaHelper('uuid-2', 1),
-            value: 1,
-          },
-          {
-            type: 'primitive',
-            meta: createMetaHelper('uuid-3', 2),
-            value: 2,
-          },
-        ],
+      type: 'object',
+      value: {
+        name: {
+          type: 'primitive',
+          meta: createMetaHelper('uuid-1', 'Special Orders TODO'),
+          value: 'Special Orders TODO',
+        },
+        items: {
+          type: 'array',
+          meta: { ...createMetaHelper('uuid-4', [1, 2]), defaultFieldUuids: ['uuid-2', 'uuid-3'] },
+          value: [
+            {
+              type: 'primitive',
+              meta: createMetaHelper('uuid-2', 1),
+              value: 1,
+            },
+            {
+              type: 'primitive',
+              meta: createMetaHelper('uuid-3', 2),
+              value: 2,
+            },
+          ],
+        },
       },
     });
   });
@@ -446,62 +438,67 @@ describe('parseStoreItemArray', () => {
   });
 });
 
-describe('flattenStore', () => {
+describe('flattenStoreItem', () => {
   it('works as expected', () => {
     expect(
-      flattenStore({
-        items: {
-          type: 'array',
-          meta: {
-            uuid: 'uuid-1',
-            dirty: false,
-            touched: false,
-            error: null,
-            validations: null,
-            defaultValue: [1, 2, 3],
-            defaultFieldUuids: ['uuid-2', 'uuid-3', 'uuid-4'],
+      flattenStoreItem({
+        type: 'object',
+        meta: createMetaHelper('uuid-5', { items: [1, 2, 3] }),
+        value: {
+          items: {
+            type: 'array',
+            meta: {
+              uuid: 'uuid-1',
+              dirty: false,
+              touched: false,
+              error: null,
+              validations: null,
+              defaultValue: [1, 2, 3],
+              defaultFieldUuids: ['uuid-2', 'uuid-3', 'uuid-4'],
+            },
+            value: [
+              {
+                type: 'primitive',
+                meta: {
+                  uuid: 'uuid-2',
+                  dirty: false,
+                  touched: false,
+                  error: null,
+                  validations: null,
+                  defaultValue: 1,
+                },
+                value: 1,
+              },
+              {
+                type: 'primitive',
+                meta: {
+                  uuid: 'uuid-3',
+                  dirty: false,
+                  touched: false,
+                  error: null,
+                  validations: null,
+                  defaultValue: 2,
+                },
+                value: 2,
+              },
+              {
+                type: 'primitive',
+                meta: {
+                  uuid: 'uuid-4',
+                  dirty: false,
+                  touched: false,
+                  error: null,
+                  validations: null,
+                  defaultValue: 3,
+                },
+                value: 3,
+              },
+            ],
           },
-          value: [
-            {
-              type: 'primitive',
-              meta: {
-                uuid: 'uuid-2',
-                dirty: false,
-                touched: false,
-                error: null,
-                validations: null,
-                defaultValue: 1,
-              },
-              value: 1,
-            },
-            {
-              type: 'primitive',
-              meta: {
-                uuid: 'uuid-3',
-                dirty: false,
-                touched: false,
-                error: null,
-                validations: null,
-                defaultValue: 2,
-              },
-              value: 2,
-            },
-            {
-              type: 'primitive',
-              meta: {
-                uuid: 'uuid-4',
-                dirty: false,
-                touched: false,
-                error: null,
-                validations: null,
-                defaultValue: 3,
-              },
-              value: 3,
-            },
-          ],
         },
       })
     ).toMatchObject([
+      { dotpath: '', path: [], storeItem: { meta: { uuid: 'uuid-5' } } },
       { dotpath: 'items', path: ['items'], storeItem: { meta: { uuid: 'uuid-1' } } },
       { dotpath: 'items[0]', path: ['items', 0], storeItem: { meta: { uuid: 'uuid-2' }, value: 1 } },
       { dotpath: 'items[1]', path: ['items', 1], storeItem: { meta: { uuid: 'uuid-3' }, value: 2 } },

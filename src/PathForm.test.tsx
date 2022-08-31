@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { render, RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { PathFormProvider } from './usePathForm';
+import { PathFormProvider } from '.';
 import { PathFormField } from './PathFormField';
 import { PathForm, PathFormArray, usePathForm, usePathFormDirtyUuids } from '.';
 
@@ -163,7 +163,7 @@ describe('PathForm', () => {
         <div
           data-testid="dirtyUuids"
         >
-          ["uuid-4","uuid-6"]
+          ["uuid-3","uuid-5"]
         </div>
       `);
 
@@ -175,7 +175,7 @@ describe('PathForm', () => {
         <div
           data-testid="dirtyUuids"
         >
-          ["uuid-4","uuid-6","uuid-7","uuid-25"]
+          ["uuid-3","uuid-5","uuid-7","uuid-25"]
         </div>
       `);
 
@@ -204,7 +204,7 @@ describe('PathForm', () => {
         <div
           data-testid="dirtyUuids"
         >
-          ["uuid-4","uuid-6"]
+          ["uuid-3","uuid-5"]
         </div>
       `);
 
@@ -216,7 +216,7 @@ describe('PathForm', () => {
         <div
           data-testid="dirtyUuids"
         >
-          ["uuid-4","uuid-6","uuid-7","uuid-25"]
+          ["uuid-3","uuid-5","uuid-7","uuid-25"]
         </div>
       `);
 

@@ -1,10 +1,9 @@
 import React from 'react';
 import { getByLabelText, getByTestId, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { PathFormProvider } from './usePathForm';
 import { PathFormField } from './PathFormField';
 import { PathForm } from './PathForm';
-import { PathFormValidation } from './usePathForm';
+import { PathFormProvider, PathFormValidation } from '.';
 
 const TestWrapper: React.FC = ({ children }) => {
   return (

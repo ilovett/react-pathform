@@ -1,5 +1,5 @@
 import { useDebugValue, useEffect, useMemo, useState } from 'react';
-import { usePathForm } from './usePathForm';
+import { usePathForm } from '.';
 
 /**
  * A hook which triggers a rerender when the subscription topic

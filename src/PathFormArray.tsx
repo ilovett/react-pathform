@@ -1,40 +1,13 @@
 import React from 'react';
-import { PathFormArrayUtils, PathFormPath, PathFormStoreMeta, toStorePath, usePathForm, usePathFormValue } from '.';
+import {
+  PathFormArrayProps,
+  PathFormArrayWrapperEmptyProps,
+  PathFormArrayWrapperItemProps,
+  toStorePath,
+  usePathForm,
+  usePathFormValue,
+} from '.';
 import { createStoreItem, get, set } from './storeUtils';
-
-export type PathFormArrayItemProps = {
-  arrayPath: PathFormPath;
-  arrayUtils: PathFormArrayUtils;
-  itemPath: PathFormPath;
-  index: number;
-  isLast: boolean;
-  isFirst: boolean;
-  totalRows: number;
-  meta: PathFormStoreMeta;
-};
-
-export type PathFormArrayEmptyProps = {
-  arrayPath: PathFormPath;
-  arrayUtils: PathFormArrayUtils;
-  meta: PathFormStoreMeta;
-};
-
-export interface PathFormArrayWrapperItemProps {
-  itemProps: PathFormArrayItemProps;
-  renderItem: (props: PathFormArrayItemProps) => React.ReactElement;
-}
-
-export interface PathFormArrayWrapperEmptyProps {
-  emptyProps: PathFormArrayEmptyProps;
-  renderEmpty: (props: PathFormArrayEmptyProps) => React.ReactElement;
-}
-
-export interface PathFormArrayProps {
-  path: PathFormPath;
-  defaultValue: any;
-  renderItem: (props: PathFormArrayItemProps) => React.ReactElement;
-  renderEmpty?: (props: PathFormArrayEmptyProps) => React.ReactElement;
-}
 
 export const PathFormArray: React.FC<PathFormArrayProps> = ({ path, renderItem, renderEmpty, defaultValue }) => {
   const { state, array } = usePathForm();

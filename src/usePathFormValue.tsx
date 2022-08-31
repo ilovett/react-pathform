@@ -1,14 +1,23 @@
-import { useState, useEffect, useMemo } from 'react';
-import { PathFormPath, PathFormStoreItem, PathFormStoreMeta, usePathForm } from './usePathForm';
-import { usePathFormDotPath } from './usePathFormDotPath';
-import { usePathFormStorePath } from './usePathFormStorePath';
-import { createStoreItem, get, parseStoreItem, set } from './storeUtils';
+import { useEffect, useMemo } from 'react';
+import {
+  usePathForm,
+  usePathFormDotPath,
+  usePathFormStorePath,
+  createStoreItem,
+  get,
+  parseStoreItem,
+  set,
+  PathFormPath,
+  PathFormStoreItem,
+  PathFormStoreMeta,
+  usePathFormSubscription,
+} from '.';
 
-export function usePathFormValue<T = any>(path: PathFormPath, defaultValue?: T) {
+export function usePathFormValue<T = any>(path: PathFormPath = [], defaultValue?: T) {
   // internal state is how we force trigger re-render, by increase renders
-  const [renders, setRenders] = useState(0);
-  const { state, watchers } = usePathForm();
+  const { state } = usePathForm();
   const dotpath = usePathFormDotPath(path);
+  const renders = usePathFormSubscription(dotpath);
   const storePath = usePathFormStorePath(path);
   const storeItem = get(state.current.store, storePath) as PathFormStoreItem;
   const defaultStoreItemValue = createStoreItem(defaultValue);
@@ -29,18 +38,6 @@ export function usePathFormValue<T = any>(path: PathFormPath, defaultValue?: T) 
     // but we only want this to happen on the initial mount
     // eslint-disable-next-line
   }, []);
-
-  useEffect(() => {
-    // subscribe to updates on this dotpath to trigger re-render by increasing internal renders
-    const unsubscribe = watchers.current.on(dotpath, () => {
-      setRenders((r) => r + 1);
-    });
-
-    // on unmount, unsubscribe by calling the function
-    return () => unsubscribe();
-  }, [dotpath, watchers]);
-
-  // TODO handle no storeItem set
 
   // fallback to defaultValue meta and storeItem on first render -- `useEffect` triggers after first render
   const meta = storeItem?.meta || defaultStoreItemValue.meta;

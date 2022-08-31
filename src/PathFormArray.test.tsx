@@ -1,6 +1,6 @@
 import React from 'react';
 import { getAllByLabelText, render } from '@testing-library/react';
-import { PathFormProvider } from './usePathForm';
+import { PathFormProvider } from '.';
 import { PathFormArray } from './PathFormArray';
 import { PathFormField } from './PathFormField';
 

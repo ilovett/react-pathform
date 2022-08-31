@@ -1,5 +1,5 @@
 import React, { FormEvent, HTMLAttributes } from 'react';
-import { usePathForm } from './usePathForm';
+import { usePathForm } from '.';
 
 export interface PathFormProps extends HTMLAttributes<HTMLFormElement> {
   /**
