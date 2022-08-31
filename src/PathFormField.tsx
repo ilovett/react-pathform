@@ -33,7 +33,7 @@ export interface PathFormFieldProps {
 }
 
 export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defaultValue, validations, publish }) => {
-  const name = usePathFormDotPath(path);
+  const dotpath = usePathFormDotPath(path);
   const [value, meta, renders] = usePathFormValue(path, defaultValue); // TODO defaultValue needed?
   const { setValue, setMeta, clearError, watchers, state, validate } = usePathForm();
 
@@ -46,7 +46,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
 
       if (publish?.path) {
         // TODO this value is wrong and should just be publish(publish?.path) -- if no value given, get the store value as-is
-        watchers.current.emit(toDotPath(publish?.path), value);
+        watchers.current.emit(dotpath, value);
       }
     },
     // ignore `watchers`
@@ -84,7 +84,7 @@ export const PathFormField: React.FC<PathFormFieldProps> = ({ path, render, defa
 
   return render({
     inputProps: {
-      name,
+      name: dotpath,
       value,
       onChange,
       onBlur,

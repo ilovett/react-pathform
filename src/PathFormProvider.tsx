@@ -206,7 +206,10 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
       // Validate field immediately on onChange mode
       if (state.current.mode === 'onChange') validate(path);
 
-      watchers.current.emit(toDotPath(path), value);
+      const dotpath = toDotPath(path);
+
+      watchers.current.emit(dotpath, value);
+      watchers.current.emit('value', { dotpath, path, storeItem });
     }
   };
 
@@ -226,6 +229,7 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
 
     // notify subscribers
     watchers.current.emit(dotpath, storeItem);
+    watchers.current.emit('meta', { dotpath, path, storeItem });
   };
 
   const addError = (path: PathFormPath, error: PathFormError, options?: PathFormErrorOptions) => {
@@ -254,6 +258,9 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
 
     // notify each the dotpath subscribers
     watchers.current.emit(dotpath, storeItem);
+
+    // meta update on error
+    watchers.current.emit('meta', { dotpath, path, storeItem });
   };
 
   /**
@@ -287,6 +294,9 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
 
     // notify subscribers
     watchers.current.emit(dotpath, storeItem);
+
+    // meta update on clearing error
+    watchers.current.emit('meta', { dotpath, path, storeItem });
   }
 
   const clearErrors = () => {
@@ -341,6 +351,9 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
 
     // notify subscribers
     watchers.current.emit(dotpath, targetArrayStoreItem);
+
+    // value on array mutate
+    watchers.current.emit('value', { dotpath, path, storeItem: targetArrayStoreItem });
   };
 
   /**
@@ -374,6 +387,7 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
     // notify store meta dirty / errors
     watchers.current.emit('dirty', state.current.dirtyUuids);
     watchers.current.emit('errors', state.current.errors);
+    watchers.current.emit('reset', state.current.store);
   }
 
   const array = {
