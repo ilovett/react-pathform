@@ -39,7 +39,7 @@ const PathFormStateCtxt = React.createContext<PathFormStateContextInitialized | 
 
 PathFormStateCtxt.displayName = 'PathFormStateContext';
 
-export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, initialRenderValues, mode = 'onSubmit' }) => {
+export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, initialRenderValues = {}, mode = 'onSubmit' }) => {
   const state = React.useRef<PathFormState>({
     store: createStoreItem(initialRenderValues),
     dirtyUuids: [],

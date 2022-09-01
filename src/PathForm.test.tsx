@@ -7,7 +7,7 @@ import { PathForm, PathFormArray, usePathForm, usePathFormDirtyUuids } from '.';
 
 const initialRenderValues = {
   firstName: 'Joey Joe Joe Jr.',
-  lastName: 'Sabadoo',
+  lastName: 'Shabadoo',
   friends: [{ firstName: 'Homer' }, { firstName: 'Barney' }],
 };
 
@@ -240,9 +240,7 @@ describe('PathForm', () => {
       `);
     });
   });
-});
 
-describe('PathForm', () => {
   describe('onSubmitEvent', () => {
     const onSubmitParent = jest.fn();
     const onSubmit = jest.fn();
@@ -263,12 +261,64 @@ describe('PathForm', () => {
       expect(onSubmit).toHaveBeenCalled();
       expect(onSubmit).toHaveBeenCalledWith({
         firstName: 'Joey Joe Joe Jr.',
-        lastName: 'Sabadoo',
+        lastName: 'Shabadoo',
         friends: [{ firstName: 'Homer' }, { firstName: 'Barney' }],
       });
 
       // onSubmitEvent stopPropagation
       expect(onSubmitParent).not.toHaveBeenCalled();
+    });
+  });
+});
+
+describe('PathForm without any initialRenderValues', () => {
+  const onSubmit = jest.fn();
+
+  it('submits expected data', () => {
+    const view = render(
+      <PathFormProvider>
+        <PathForm onSubmit={onSubmit}>
+          <PathFormField
+            path={['firstName']}
+            defaultValue="Joey Joe Joe Jr."
+            render={({ inputProps, meta, renders }) => {
+              return (
+                <div>
+                  <label htmlFor={meta.uuid}>First Name</label>
+                  <input id={meta.uuid} {...inputProps} />
+                  <pre data-testid="meta-firstName">{JSON.stringify(meta)}</pre>
+                  <pre data-testid="renders">{JSON.stringify(renders)}</pre>
+                </div>
+              );
+            }}
+          />
+
+          <PathFormField
+            path={['lastName']}
+            defaultValue="Shabadoo"
+            render={({ inputProps, meta, renders }) => {
+              return (
+                <div>
+                  <label htmlFor={meta.uuid}>Last Name</label>
+                  <input id={meta.uuid} {...inputProps} />
+                  <pre data-testid="meta-lastName">{JSON.stringify(meta)}</pre>
+                  <pre data-testid="renders">{JSON.stringify(renders)}</pre>
+                </div>
+              );
+            }}
+          />
+
+          <button type="submit">Submit</button>
+        </PathForm>
+      </PathFormProvider>
+    );
+
+    userEvent.click(view.getByText('Submit'));
+
+    expect(onSubmit).toHaveBeenCalled();
+    expect(onSubmit).toHaveBeenCalledWith({
+      firstName: 'Joey Joe Joe Jr.',
+      lastName: 'Shabadoo',
     });
   });
 });
