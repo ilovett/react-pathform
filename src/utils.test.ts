@@ -1,4 +1,4 @@
-import { difference, getValue, mapValues, noDifference, setValue } from './utils';
+import { equals, getValue, mapValues, setValue } from './utils';
 
 describe('getValue', () => {
   it('gets nested values as expected', () => {
@@ -85,34 +85,17 @@ describe('mapValues', function() {
   });
 });
 
-describe('difference', () => {
-  it('returns array of differing primary items', () => {
-    expect(difference([1, 2, 3], [2, 3, 4])).toStrictEqual([1]);
+describe('equals', () => {
+  it('returns `true` when the arrays have matching primitive values', () => {
+    expect(equals([1, 2, 3], [1, 2, 3])).toBe(true);
+    expect(equals([true, true, false], [true, true, false])).toBe(true);
+    expect(equals(['one', 'two', 'three'], ['one', 'two', 'three'])).toBe(true);
   });
 
-  it('returns no difference when all items match', () => {
-    expect(difference([1], [1])).toStrictEqual([]);
-  });
-
-  it('returns no difference when no items in either', () => {
-    expect(difference([], [])).toStrictEqual([]);
-  });
-
-  it('handles string', () => {
-    expect(difference(['one', 'two', 'three'], ['two'])).toStrictEqual(['one', 'three']);
-  });
-
-  it('handles boolean', () => {
-    expect(difference([true, false], [true])).toStrictEqual([false]);
-  });
-});
-
-describe('noDifference', () => {
-  it('returns `true` when all primary array items exist in secondary', () => {
-    expect(noDifference([1, 2, 3], [2, 3, 4, 5, 1])).toBe(true);
-  });
-
-  it('returns `false` when all primary array items are not contained in secondary', () => {
-    expect(noDifference([1, 2, 3], [2, 3, 4])).toBe(false);
+  it('returns `false` when the arrays have mismatching primitive values', () => {
+    expect(equals([1, 2, 3], [1])).toBe(false);
+    expect(equals([1, 2, 3], [1, 2, 3, 4])).toBe(false);
+    expect(equals([1, 2, 3], [3, 2, 1])).toBe(false);
+    expect(equals([true], [false])).toBe(false);
   });
 });

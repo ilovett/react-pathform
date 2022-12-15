@@ -71,18 +71,27 @@ export function setValue(obj: Record<string | number, any>, path: PathFormPath, 
 }
 
 /**
- * Creates an array of array values not included in the other
- * given arrays using SameValueZero for equality comparisons.
- * The order and references of result values are determined by the first array.
+ * Returns `true` if two arrays have the equal primitive values in the same order.
+ * Otherwise, returns `false`.
  *
- * @param a
- * @param b
- * @returns
+ *
+ * @example
+ * equals([1, 2, 3], [1, 2, 3]); // true
+ * equals([1, 2], [2, 1]); // false
  */
-export function difference(a: Array<PathFormValuePrimitive>, b: Array<PathFormValuePrimitive> = []) {
-  return a.filter((item) => !b.includes(item));
-}
+export function equals(arrA: Array<PathFormValuePrimitive>, arrB: Array<PathFormValuePrimitive>) {
+  if (arrA?.length !== arrB?.length) {
+    return false;
+  }
 
-export function noDifference(a: Array<PathFormValuePrimitive>, b: Array<PathFormValuePrimitive> = []) {
-  return difference(a, b).length === 0;
+  for (let i in arrA) {
+    const a = arrA[i];
+    const b = arrB[i];
+
+    if (a !== b) {
+      return false;
+    }
+  }
+
+  return true;
 }

@@ -25,7 +25,7 @@ import {
   PathFormStateContextInitialized,
   PathFormStateContext,
 } from '.';
-import { noDifference } from './utils';
+import { equals } from './utils';
 
 export interface PathFormProviderProps {
   initialRenderValues?: any; // TODO generics or something
@@ -329,7 +329,7 @@ export const PathFormProvider: React.FC<PathFormProviderProps> = ({ children, in
 
     // if current field state is equal to default state field uuids
     // unmark it as dirty
-    if (noDifference(currentFieldUuids, targetArrayStoreItem.meta.defaultFieldUuids)) {
+    if (equals(currentFieldUuids, targetArrayStoreItem.meta.defaultFieldUuids)) {
       targetArrayStoreItem.meta.dirty = false;
 
       // remove it from the dirty uuids if found
